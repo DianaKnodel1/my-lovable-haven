@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { FileText, Download, Trash2, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { exportToCsv } from "@/lib/csv-export";
 import { TableSkeleton, PageHeaderSkeleton } from "@/components/SkeletonLoaders";
+import { ImportApplicationsDialog } from "@/components/ImportApplicationsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePagination } from "@/hooks/use-pagination";
@@ -210,6 +211,7 @@ function AdminApplicationsPage() {
         </div>
         <div className="flex gap-2 items-center">
           <Input placeholder="Suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs h-9 text-sm" />
+          <ImportApplicationsDialog onImported={loadData} />
           <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5" onClick={() => exportToCsv("bewerbungen.csv", filtered, [
             { key: "full_name", label: "Name" }, { key: "email", label: "E-Mail" }, { key: "phone", label: "Telefon" },
             { key: "status", label: "Status" }, { key: "created_at", label: "Datum" },
