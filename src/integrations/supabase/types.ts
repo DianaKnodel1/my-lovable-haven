@@ -149,6 +149,30 @@ export type Database = {
           },
         ]
       }
+      booking_limits: {
+        Row: {
+          daily_limit: number
+          employment_type: Database["public"]["Enums"]["employment_type"]
+          min_pause_days: number
+          monthly_limit: number | null
+          updated_at: string
+        }
+        Insert: {
+          daily_limit?: number
+          employment_type: Database["public"]["Enums"]["employment_type"]
+          min_pause_days?: number
+          monthly_limit?: number | null
+          updated_at?: string
+        }
+        Update: {
+          daily_limit?: number
+          employment_type?: Database["public"]["Enums"]["employment_type"]
+          min_pause_days?: number
+          monthly_limit?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           admin_override: boolean
