@@ -203,15 +203,13 @@ export function GuidedOnboarding() {
     const key = `${STORAGE_PREFIX}${user.id}`;
     const done = localStorage.getItem(key);
     if (done) { setReady(true); return; }
-    supabase
-      .from("profiles")
-      .select("onboarding_status")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.onboarding_status === "abgeschlossen") setShow(true);
-        setReady(true);
-      });
+    // Tour startet NUR explizit über "Tour starten"-Button (sessionStorage-Flag)
+    // oder über den Hilfe-Button im Header. Kein Auto-Start mehr.
+    if (sessionStorage.getItem(`start_tour_${user.id}`) === "1") {
+      sessionStorage.removeItem(`start_tour_${user.id}`);
+      setShow(true);
+    }
+    setReady(true);
   }, [user]);
 
   const close = useCallback(() => {
