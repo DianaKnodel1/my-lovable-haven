@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { translateAuthError } from "@/lib/auth-errors";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Lock, Save, Palette } from "lucide-react";
+import { Lock, Save, Palette, CalendarClock } from "lucide-react";
+import { BookingLimitsCard } from "@/components/admin/BookingLimitsCard";
 
 function AdminSettingsPage() {
   const { toast } = useToast();
@@ -86,6 +87,8 @@ function AdminSettingsPage() {
       <p className="text-xs text-muted-foreground">
         SMS API Keys werden im Bereich <strong>SMS</strong> verwaltet.
       </p>
+
+      <BookingLimitsCard />
     </div>
   );
 }

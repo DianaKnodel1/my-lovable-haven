@@ -515,30 +515,59 @@ function AdminEmployeeDetailPage() {
         <TabsContent value="tasks">
           <Card>
             <CardContent className="pt-5 pb-5">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                Aufgaben ({userAssignments.length})
-              </p>
-              {userAssignments.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Keine Aufgaben zugewiesen.</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {userAssignments.map((a) => {
-                    const tpl = templates.find((t) => t.id === a.task_template_id);
-                    const sCfg = TASK_STATUS_CONFIG[a.status as TaskAssignmentStatus];
-                    return (
-                      <div key={a.id} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-                        <div>
-                          <span className="text-sm text-foreground">{tpl?.title ?? "Aufgabe"}</span>
-                          {tpl && <span className="text-xs text-muted-foreground ml-2">{Number(tpl.compensation).toFixed(2)} €</span>}
+              {(() => {
+                const DONE = new Set(["abgeschlossen", "genehmigt", "abgelehnt"]);
+                const active = userAssignments.filter((a) => !DONE.has(a.status));
+                const past = userAssignments.filter((a) => DONE.has(a.status));
+                const renderRow = (a: typeof userAssignments[number]) => {
+                  const tpl = templates.find((t) => t.id === a.task_template_id);
+                  const sCfg = TASK_STATUS_CONFIG[a.status as TaskAssignmentStatus];
+                  return (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between py-2.5 border-b border-border last:border-0 hover:bg-muted/20 -mx-2 px-2 rounded cursor-pointer"
+                      onClick={() => navigate(`/admin/assignments/${a.id}`)}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-foreground truncate">{tpl?.title ?? "Aufgabe"}</span>
+                          {tpl && <span className="text-xs text-muted-foreground">{Number(tpl.compensation).toFixed(2)} €</span>}
                         </div>
-                        <Badge variant="secondary" className={`text-[10px] ${sCfg?.color ?? ""}`}>
-                          {sCfg?.label ?? a.status}
-                        </Badge>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Zugewiesen: {new Date(a.created_at).toLocaleDateString("de-DE")}
+                        </p>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                      <Badge variant="secondary" className={`text-[10px] ${sCfg?.color ?? ""}`}>
+                        {sCfg?.label ?? a.status}
+                      </Badge>
+                    </div>
+                  );
+                };
+                return (
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        Aktive Aufträge ({active.length})
+                      </p>
+                      {active.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">Keine aktiven Aufträge.</p>
+                      ) : (
+                        <div>{active.map(renderRow)}</div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        Vergangene Aufträge ({past.length})
+                      </p>
+                      {past.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">Noch keine abgeschlossenen Aufträge.</p>
+                      ) : (
+                        <div className="opacity-80">{past.map(renderRow)}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>
