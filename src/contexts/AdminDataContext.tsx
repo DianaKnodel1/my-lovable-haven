@@ -47,6 +47,7 @@ interface AdminDataContextType {
   allTransactions: TransactionRow[];
   chatConversations: ChatConversationRow[];
   adminUserIds: Set<string>;
+  emailConfirmedUserIds: Set<string>;
   loading: boolean;
   loadData: () => Promise<void>;
   setProfiles: React.Dispatch<React.SetStateAction<ProfileRow[]>>;
@@ -75,6 +76,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [allTransactions, setAllTransactions] = useState<TransactionRow[]>([]);
   const [chatConversations, setChatConversations] = useState<ChatConversationRow[]>([]);
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
+  const [emailConfirmedUserIds, setEmailConfirmedUserIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -96,6 +98,12 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     const profileData = (profilesRes.data as ProfileRow[]) ?? [];
     setProfiles(profileData);
     setAdminUserIds(new Set((rolesRes.data ?? []).map((r: any) => r.user_id)));
+
+    // E-Mail-Bestätigungen (admin RPC)
+    try {
+      const { data: confs } = await (supabase as any).rpc("admin_get_email_confirmations");
+      setEmailConfirmedUserIds(new Set((confs ?? []).filter((c: any) => c.email_confirmed).map((c: any) => c.user_id)));
+    } catch { /* ignore */ }
 
     const kycData = (kycRes.data as KycRow[]) ?? [];
     for (const kyc of kycData) {
@@ -125,7 +133,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   return (
     <AdminDataContext.Provider value={{
       applications, profiles, kycList, templates, assignments, timeSlots, allBookings, allTransactions, chatConversations,
-      adminUserIds, loading, loadData, setProfiles, setKycList, setAllTransactions, getProfileForUser,
+      adminUserIds, emailConfirmedUserIds, loading, loadData, setProfiles, setKycList, setAllTransactions, getProfileForUser,
     }}>
       {children}
     </AdminDataContext.Provider>

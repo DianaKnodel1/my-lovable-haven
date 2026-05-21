@@ -1708,6 +1708,13 @@ export type Database = {
       }
     }
     Functions: {
+      admin_get_email_confirmations: {
+        Args: never
+        Returns: {
+          email_confirmed: boolean
+          user_id: string
+        }[]
+      }
       admin_get_user_contact: {
         Args: { _user_id: string }
         Returns: {
