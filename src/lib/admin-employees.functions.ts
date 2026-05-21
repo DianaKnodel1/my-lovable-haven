@@ -86,7 +86,7 @@ export const createEmployeeAccount = createServerFn({ method: "POST" })
       tenant_id: data.tenant_id || null,
       status: data.status,
       admin_notes: data.admin_notes || null,
-      onboarding_status: data.status === "angenommen" ? "abgeschlossen" : "in_bearbeitung",
+      onboarding_status: (data.status === "angenommen" ? "abgeschlossen" : "in_bearbeitung") as "abgeschlossen" | "in_bearbeitung",
     };
 
     const { error: updErr } = await supabaseAdmin
