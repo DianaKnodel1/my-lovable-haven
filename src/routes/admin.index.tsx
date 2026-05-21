@@ -96,49 +96,6 @@ function AdminDashboardPage() {
   const { profiles, applications, assignments, allBookings, kycList, loading } = useAdminData();
   const navigate = useNavigate();
 
-  // Conversion-Funnel
-  const funnel = useMemo(() => {
-    const apps = applications.length;
-    const kycSubmitted = kycList.filter((k) => ["eingereicht", "in_pruefung", "verifiziert"].includes(k.status as any)).length;
-    const kycVerified = kycList.filter((k) => k.status === "verifiziert").length;
-    const contractSigned = profiles.filter((p: any) => p.contract_signed_at).length;
-    const withAssignment = new Set(assignments.map((a: any) => a.user_id)).size;
-    const max = Math.max(apps, 1);
-    return [
-      { label: "Bewerbungen", value: apps, pct: 100 },
-      { label: "KYC eingereicht", value: kycSubmitted, pct: Math.round((kycSubmitted / max) * 100) },
-      { label: "KYC verifiziert", value: kycVerified, pct: Math.round((kycVerified / max) * 100) },
-      { label: "Vertrag unterschrieben", value: contractSigned, pct: Math.round((contractSigned / max) * 100) },
-      { label: "Erster Auftrag", value: withAssignment, pct: Math.round((withAssignment / max) * 100) },
-    ];
-  }, [applications, kycList, profiles, assignments]);
-
-  // Hängengeblieben: Mitarbeiter, die in einer Stufe feststecken
-  const stuck = useMemo(() => {
-    const kycByUser = new Map(kycList.map((k: any) => [k.user_id, k]));
-    const assignmentUserIds = new Set(assignments.map((a: any) => a.user_id));
-
-    const noKyc = profiles.filter((p: any) => p.status !== "abgelehnt" && !kycByUser.has(p.user_id));
-    const kycPending = profiles.filter((p: any) => {
-      const k = kycByUser.get(p.user_id);
-      return k && (k.status === "eingereicht" || k.status === "in_pruefung");
-    });
-    const noContract = profiles.filter((p: any) => {
-      const k = kycByUser.get(p.user_id);
-      return k?.status === "verifiziert" && !p.contract_signed_at;
-    });
-    const noAssignment = profiles.filter((p: any) => p.contract_signed_at && !assignmentUserIds.has(p.user_id));
-
-    return [
-      { label: "Kein KYC begonnen", users: noKyc, color: "text-amber-600" },
-      { label: "KYC wartet auf Prüfung", users: kycPending, color: "text-blue-600" },
-      { label: "Vertrag offen", users: noContract, color: "text-orange-600" },
-      { label: "Bereit, kein Auftrag", users: noAssignment, color: "text-purple-600" },
-    ];
-  }, [profiles, kycList, assignments]);
-
-
-
   if (loading) return <AdminDashboardSkeleton />;
 
   const newApplications = applications.filter((a) => a.status === "neu" || a.status === "eingegangen").length;
