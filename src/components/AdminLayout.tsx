@@ -14,40 +14,32 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Globe, Settings, Phone, Sparkles, Mail, Palette, Mailbox, Search, ShieldCheck } from "lucide-react";
+import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Globe, Settings, Phone, Sparkles, Mail, Palette, Mailbox, Search, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminCommandPalette } from "@/components/AdminCommandPalette";
 import { useAdminBadges } from "@/hooks/use-admin-badges";
 import { useEffect } from "react";
 
-const mainNav = [
-  { title: "Dashboard", url: "/admin", icon: LayoutGrid, end: true },
+// Flache, minimale Navigation – wie im Referenz-Screenshot.
+const navItems = [
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
   { title: "Bewerbungen", url: "/admin/applications", icon: FileText, badgeKey: "newApplications" as const },
   { title: "Mitarbeiter", url: "/admin/employees", icon: Users },
   { title: "KYC", url: "/admin/kyc", icon: ShieldCheck, badgeKey: "pendingKyc" as const },
-  { title: "Aufgaben", url: "/admin/tasks", icon: ClipboardList },
-];
-
-const reviewNav = [
+  { title: "Aufträge", url: "/admin/tasks", icon: ClipboardList },
   { title: "Prüfungen", url: "/admin/reviews", icon: CheckSquare },
   { title: "Nachbesserungen", url: "/admin/revisions", icon: RotateCcw },
-];
-
-const opsNav = [
   { title: "Termine", url: "/admin/appointments", icon: CalendarDays },
   { title: "Chat", url: "/admin/chat", icon: MessageCircle, badgeKey: "unreadChat" as const },
   { title: "SMS", url: "/admin/sms", icon: Phone },
   { title: "Post", url: "/admin/post", icon: Mailbox },
   { title: "Transaktionen", url: "/admin/transactions", icon: Wallet },
-];
-
-const sysNav = [
   { title: "E-Mail Templates", url: "/admin/email-templates", icon: Palette },
   { title: "E-Mail Monitoring", url: "/admin/email-logs", icon: Mail },
-  { title: "Protokoll", url: "/admin/activity", icon: History },
   { title: "Verträge", url: "/admin/contracts", icon: FileText },
   { title: "Domains", url: "/admin/tenants", icon: Globe },
   { title: "KI-Antworten", url: "/admin/ai-settings", icon: Sparkles },
+  { title: "Protokoll", url: "/admin/activity", icon: History },
   { title: "Einstellungen", url: "/admin/settings", icon: Settings },
 ];
 
@@ -66,86 +58,61 @@ function AdminSidebar() {
   const { signOut } = useAuth();
   const badges = useAdminBadges();
 
-  const renderGroup = (label: string, items: NavItem[]) => (
-    <SidebarGroup className="py-1">
-      {!collapsed && (
-        <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-wider px-3 mb-0.5">
-          {label}
-        </SidebarGroupLabel>
-      )}
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => {
-            const count = item.badgeKey ? badges[item.badgeKey] : 0;
-            return (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <NavLink
-                    to={item.url}
-                    end={item.end}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-                    activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                  >
-                    <item.icon className="h-[18px] w-[18px] shrink-0" />
-                    {!collapsed && <span className="text-sm flex-1">{item.title}</span>}
-                    {count > 0 && (
-                      <span className={`${collapsed ? "absolute top-1 right-1 h-4 min-w-[16px]" : "h-5 min-w-[20px]"} px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center`}>
-                        {count > 99 ? "99+" : count}
-                      </span>
-                    )}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
-
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-[#0c0e12] dark:bg-[#0c0e12]">
       <SidebarContent className="flex flex-col h-full">
         {/* Brand */}
-        <div className="px-4 py-5 border-b border-sidebar-border">
+        <div className="px-4 py-4">
           {!collapsed ? (
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-                <LayoutGrid className="h-4 w-4 text-sidebar-primary-foreground" />
-              </div>
-              <div>
-                <span className="text-sm font-heading font-bold text-sidebar-primary-foreground">Admin</span>
-                <p className="text-[10px] text-sidebar-foreground/50 leading-none">Management</p>
-              </div>
-            </div>
+            <span className="text-sm font-semibold text-white/90 tracking-tight">Admin</span>
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-sidebar-primary flex items-center justify-center mx-auto">
-              <LayoutGrid className="h-4 w-4 text-sidebar-primary-foreground" />
-            </div>
+            <div className="h-6 w-6 rounded bg-white/10 mx-auto" />
           )}
         </div>
 
-        {/* Navigation groups */}
-        <div className="flex-1 overflow-y-auto py-2">
-          {renderGroup("Übersicht", mainNav)}
-          {!collapsed && <div className="mx-3 my-1 h-px bg-sidebar-border" />}
-          {renderGroup("Qualität", reviewNav)}
-          {!collapsed && <div className="mx-3 my-1 h-px bg-sidebar-border" />}
-          {renderGroup("Betrieb", opsNav)}
-          {!collapsed && <div className="mx-3 my-1 h-px bg-sidebar-border" />}
-          {renderGroup("System", sysNav)}
+        {/* Flache Navigation */}
+        <div className="flex-1 overflow-y-auto px-2 pb-2">
+          <SidebarGroup className="py-0">
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-0.5">
+                {navItems.map((item) => {
+                  const count = (item as any).badgeKey ? badges[(item as any).badgeKey as BadgeKey] : 0;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          end={(item as any).end}
+                          className="relative flex items-center gap-3 px-2.5 py-1.5 rounded-md text-[13px] text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors"
+                          activeClassName="!bg-white/10 !text-white"
+                        >
+                          <item.icon className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+                          {!collapsed && <span className="flex-1 truncate">{item.title}</span>}
+                          {count > 0 && (
+                            <span className={`${collapsed ? "absolute top-1 right-1 h-3.5 min-w-[14px] text-[9px]" : "h-4 min-w-[16px] text-[10px]"} px-1 rounded-full bg-primary text-primary-foreground font-medium flex items-center justify-center`}>
+                              {count > 99 ? "99+" : count}
+                            </span>
+                          )}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         </div>
 
         {/* Logout */}
-        <div className="border-t border-sidebar-border p-3">
+        <div className="border-t border-white/5 p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={signOut}
-                className="text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                className="text-white/50 hover:text-white hover:bg-white/5 text-[13px]"
               >
-                <LogOut className="h-[18px] w-[18px] shrink-0" />
-                {!collapsed && <span className="text-sm">Abmelden</span>}
+                <LogOut className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+                {!collapsed && <span>Abmelden</span>}
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
