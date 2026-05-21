@@ -83,11 +83,11 @@ function AdminSidebar() {
                         <NavLink
                           to={item.url}
                           end={(item as any).end}
-                          className="relative flex items-center gap-3 px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-white/55 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden"
+                          className="relative flex flex-nowrap items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-white/55 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden whitespace-nowrap"
                           activeClassName="!bg-primary !text-white shadow-[0_2px_8px_-2px_hsl(var(--primary)/0.6)]"
                         >
                           <item.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
-                          {!collapsed && <span className="truncate">{item.title}</span>}
+                          {!collapsed && <span className="truncate min-w-0">{item.title}</span>}
                           {count > 0 && (
                             <span
                               className={
