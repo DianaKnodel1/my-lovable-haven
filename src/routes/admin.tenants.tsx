@@ -4,8 +4,9 @@ export const Route = createFileRoute("/admin/tenants")({
   component: AdminTenantsPage,
 });
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/image-compression";
 import { useAllTenants, type Tenant } from "@/hooks/use-tenant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
   const [leaderTitle, setLeaderTitle] = useState(tenant?.team_leader_title ?? "Dein Ansprechpartner");
   const [leaderOnline, setLeaderOnline] = useState(tenant?.team_leader_online ?? true);
   const [leaderResponseTime, setLeaderResponseTime] = useState(tenant?.team_leader_response_time ?? "Antwortet in wenigen Minuten");
+  const [leaderAvatarUrl, setLeaderAvatarUrl] = useState<string | null>(tenant?.team_leader_avatar_url ?? null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [whatsappNumber, setWhatsappNumber] = useState((tenant as any)?.whatsapp_number ?? "");
   const [companyAddress, setCompanyAddress] = useState(tenant?.company_address ?? "");
   const [companyContactPerson, setCompanyContactPerson] = useState(tenant?.company_contact_person ?? "");
@@ -100,6 +104,7 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
       team_leader_title: leaderTitle.trim() || "Dein Ansprechpartner",
       team_leader_online: leaderOnline,
       team_leader_response_time: leaderResponseTime.trim() || "Antwortet in wenigen Minuten",
+      team_leader_avatar_url: leaderAvatarUrl,
       whatsapp_number: whatsappNumber.trim() || null,
       company_address: companyAddress.trim() || null,
       company_contact_person: companyContactPerson.trim() || null,
