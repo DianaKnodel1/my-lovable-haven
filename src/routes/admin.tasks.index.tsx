@@ -4,7 +4,7 @@ export const Route = createFileRoute("/admin/tasks/")({
   component: AdminTasksPage,
 });
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import { useAdminData, type TaskTemplate, type TaskQuestion } from "@/contexts/AdminDataContext";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { EmptyState } from "@/components/EmptyState";
-import { Plus, Trash2, ClipboardList, Pencil, Layers, Copy } from "lucide-react";
+import { Plus, Trash2, ClipboardList, Pencil, Layers, Copy, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function AdminTasksPage() {
@@ -34,7 +34,31 @@ function AdminTasksPage() {
   const [formImageUrl, setFormImageUrl] = useState("");
   const [formQuestions, setFormQuestions] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
+  const uploadImage = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Datei zu groß", description: "Max. 5 MB.", variant: "destructive" });
+      return;
+    }
+    setUploadingImage(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user?.id ?? "anon"}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("task-images")
+      .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+    if (error) {
+      toast({ title: "Upload fehlgeschlagen", description: error.message, variant: "destructive" });
+      setUploadingImage(false);
+      return;
+    }
+    const { data: pub } = supabase.storage.from("task-images").getPublicUrl(path);
+    setFormImageUrl(pub.publicUrl);
+    setUploadingImage(false);
+    toast({ title: "Bild hochgeladen" });
+  };
+
 
   const resetForm = () => {
     setFormTitle(""); setFormDesc(""); setFormInstructions(""); setFormCompensation(""); setFormImageUrl(""); setFormQuestions([]);
@@ -172,7 +196,7 @@ function AdminTasksPage() {
                   </td>
                   <td className="px-4 py-3 text-foreground font-medium">{Number(tpl.compensation).toFixed(2)} €</td>
                   <td className="px-4 py-3">
-                    <Badge variant="secondary" className={cn("text-[10px]", tpl.is_active ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground")}>
+                    <Badge variant="secondary" className={cn("text-[10px] font-medium border", tpl.is_active ? "bg-status-success/15 text-status-success border-status-success/30" : "bg-muted text-muted-foreground border-border")}>
                       {tpl.is_active ? "Aktiv" : "Inaktiv"}
                     </Badge>
                   </td>
@@ -221,8 +245,32 @@ function AdminTasksPage() {
               <Input type="number" value={formCompensation} onChange={(e) => setFormCompensation(e.target.value)} placeholder="0.00" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Bild-URL (optional)</label>
-              <Input value={formImageUrl} onChange={(e) => setFormImageUrl(e.target.value)} placeholder="https://example.com/bild.jpg" />
+              <label className="text-xs font-medium text-muted-foreground">Bild (optional)</label>
+              <div className="flex gap-2">
+                <Input value={formImageUrl} onChange={(e) => setFormImageUrl(e.target.value)} placeholder="https://… oder hochladen" />
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadImage(f);
+                    e.target.value = "";
+                  }}
+                />
+                <Button type="button" variant="outline" size="sm" className="h-9 shrink-0" disabled={uploadingImage} onClick={() => imageInputRef.current?.click()}>
+                  {uploadingImage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+              {formImageUrl && (
+                <div className="flex items-center gap-2 mt-2">
+                  <img src={formImageUrl} alt="" className="h-12 w-12 rounded object-cover border border-border" />
+                  <Button type="button" variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => setFormImageUrl("")}>
+                    <Trash2 className="h-3 w-3 mr-1" /> Entfernen
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-xs font-medium text-muted-foreground">Fragebogen (optional)</label>

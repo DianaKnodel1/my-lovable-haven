@@ -82,13 +82,19 @@ function AdminSidebar() {
                         <NavLink
                           to={item.url}
                           end={(item as any).end}
-                          className="relative flex items-center gap-3 px-2.5 py-1.5 rounded-md text-[13px] text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors"
+                          className="relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden"
                           activeClassName="!bg-white/10 !text-white"
                         >
                           <item.icon className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
-                          {!collapsed && <span className="flex-1 truncate">{item.title}</span>}
+                          {!collapsed && <span className="truncate">{item.title}</span>}
                           {count > 0 && (
-                            <span className={`${collapsed ? "absolute top-1 right-1 h-3.5 min-w-[14px] text-[9px]" : "h-4 min-w-[16px] text-[10px]"} px-1 rounded-full bg-primary text-primary-foreground font-medium flex items-center justify-center`}>
+                            <span
+                              className={
+                                collapsed
+                                  ? "absolute top-1 right-1 inline-flex h-3.5 min-w-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-medium items-center justify-center leading-none"
+                                  : "ml-auto inline-flex h-[18px] min-w-[18px] w-auto px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold items-center justify-center leading-none shrink-0"
+                              }
+                            >
                               {count > 99 ? "99+" : count}
                             </span>
                           )}

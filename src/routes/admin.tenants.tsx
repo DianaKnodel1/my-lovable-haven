@@ -4,8 +4,9 @@ export const Route = createFileRoute("/admin/tenants")({
   component: AdminTenantsPage,
 });
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/image-compression";
 import { useAllTenants, type Tenant } from "@/hooks/use-tenant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
   const [leaderTitle, setLeaderTitle] = useState(tenant?.team_leader_title ?? "Dein Ansprechpartner");
   const [leaderOnline, setLeaderOnline] = useState(tenant?.team_leader_online ?? true);
   const [leaderResponseTime, setLeaderResponseTime] = useState(tenant?.team_leader_response_time ?? "Antwortet in wenigen Minuten");
+  const [leaderAvatarUrl, setLeaderAvatarUrl] = useState<string | null>(tenant?.team_leader_avatar_url ?? null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [whatsappNumber, setWhatsappNumber] = useState((tenant as any)?.whatsapp_number ?? "");
   const [companyAddress, setCompanyAddress] = useState(tenant?.company_address ?? "");
   const [companyContactPerson, setCompanyContactPerson] = useState(tenant?.company_contact_person ?? "");
@@ -100,6 +104,7 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
       team_leader_title: leaderTitle.trim() || "Dein Ansprechpartner",
       team_leader_online: leaderOnline,
       team_leader_response_time: leaderResponseTime.trim() || "Antwortet in wenigen Minuten",
+      team_leader_avatar_url: leaderAvatarUrl,
       whatsapp_number: whatsappNumber.trim() || null,
       company_address: companyAddress.trim() || null,
       company_contact_person: companyContactPerson.trim() || null,
@@ -236,17 +241,58 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Teamleiter-Profil</p>
         <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
           <div className="relative">
-            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">{leaderInitials}</span>
-            </div>
+            {leaderAvatarUrl ? (
+              <img src={leaderAvatarUrl} alt="" className="h-11 w-11 rounded-full object-cover" />
+            ) : (
+              <div className="h-11 w-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <span className="text-xs font-bold text-primary">{leaderInitials}</span>
+              </div>
+            )}
             {leaderOnline && (
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-accent border-2 border-card" />
             )}
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">{leaderName || "Teamleiter"}</p>
             <p className="text-xs text-muted-foreground">{leaderTitle || "Dein Ansprechpartner"}</p>
             <p className="text-[10px] text-accent">{leaderOnline ? "Online" : leaderResponseTime}</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.currentTarget.value = "";
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) { toast({ title: "Datei zu groß", description: "Max. 5 MB.", variant: "destructive" }); return; }
+                setUploadingAvatar(true);
+                try {
+                  const compressed = await compressImage(file, { maxDim: 512, quality: 0.9 });
+                  const ext = compressed.name.split(".").pop() || "jpg";
+                  const path = `${tenant?.id ?? "new"}/${Date.now()}.${ext}`;
+                  const { error } = await supabase.storage.from("team-leader-avatars").upload(path, compressed, { cacheControl: "3600", upsert: true, contentType: compressed.type });
+                  if (error) throw error;
+                  const { data: pub } = supabase.storage.from("team-leader-avatars").getPublicUrl(path);
+                  setLeaderAvatarUrl(pub.publicUrl);
+                  toast({ title: "Bild hochgeladen", description: "Vergiss nicht zu speichern." });
+                } catch (err: any) {
+                  toast({ title: "Upload fehlgeschlagen", description: err.message, variant: "destructive" });
+                } finally {
+                  setUploadingAvatar(false);
+                }
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" className="h-7 text-xs" disabled={uploadingAvatar} onClick={() => avatarInputRef.current?.click()}>
+              {uploadingAvatar ? <Loader2 className="h-3 w-3 animate-spin" /> : <><User className="h-3 w-3 mr-1" /> Bild</>}
+            </Button>
+            {leaderAvatarUrl && (
+              <Button type="button" variant="ghost" size="sm" className="h-6 text-[10px] text-destructive" onClick={() => setLeaderAvatarUrl(null)}>
+                Entfernen
+              </Button>
+            )}
           </div>
         </div>
 
