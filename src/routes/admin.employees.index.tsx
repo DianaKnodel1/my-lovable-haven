@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Download, CheckCircle2, XCircle, Power, Shield, Mail, User, MapPin, ShieldCheck, FileSignature, CalendarDays, ClipboardList } from "lucide-react";
+import { AlertTriangle, Download, CheckCircle2, XCircle, Power, Shield, Mail, User, MapPin, ShieldCheck, FileSignature, CalendarDays, ClipboardList, UserPlus } from "lucide-react";
+import { CreateEmployeeWizard } from "@/components/admin/CreateEmployeeWizard";
 import { exportToCsv } from "@/lib/csv-export";
 import { TableSkeleton, PageHeaderSkeleton } from "@/components/SkeletonLoaders";
 import { useToast } from "@/hooks/use-toast";
@@ -68,6 +69,7 @@ function AdminEmployeesPage() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("tenants").select("id, name").then(({ data }) => {
@@ -143,6 +145,9 @@ function AdminEmployeesPage() {
           <p className="text-sm text-muted-foreground mt-0.5">{profiles.length} Einträge</p>
         </div>
         <div className="flex gap-2 items-center">
+          <Button size="sm" className="h-9 text-xs gap-1.5" onClick={() => setWizardOpen(true)}>
+            <UserPlus className="h-3.5 w-3.5" /> Mitarbeiter anlegen
+          </Button>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-44 h-9 text-xs"><SelectValue placeholder="Alle Status" /></SelectTrigger>
             <SelectContent>
@@ -165,6 +170,13 @@ function AdminEmployeesPage() {
           ])}><Download className="h-3.5 w-3.5" /> CSV</Button>
         </div>
       </div>
+
+      <CreateEmployeeWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        tenants={Object.entries(tenantMap).map(([id, name]) => ({ id, name }))}
+        onCreated={() => loadData()}
+      />
 
       <div className="border rounded-xl overflow-hidden bg-card shadow-sm">
         <table className="w-full text-sm">
