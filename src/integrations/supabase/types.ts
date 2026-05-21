@@ -664,14 +664,19 @@ export type Database = {
           address: string | null
           admin_notes: string | null
           application_id: string | null
+          birth_country: string | null
           birth_date: string | null
+          birth_name: string | null
           birth_place: string | null
           city: string | null
           contract_signed_at: string | null
           created_at: string
+          current_activity: string | null
           employment_start_date: string | null
           employment_type: Database["public"]["Enums"]["employment_type"] | null
+          family_status: string | null
           full_name: string
+          health_insurance: string | null
           iban: string | null
           id: string
           last_reminder_sent_at: string | null
@@ -698,16 +703,21 @@ export type Database = {
           address?: string | null
           admin_notes?: string | null
           application_id?: string | null
+          birth_country?: string | null
           birth_date?: string | null
+          birth_name?: string | null
           birth_place?: string | null
           city?: string | null
           contract_signed_at?: string | null
           created_at?: string
+          current_activity?: string | null
           employment_start_date?: string | null
           employment_type?:
             | Database["public"]["Enums"]["employment_type"]
             | null
+          family_status?: string | null
           full_name: string
+          health_insurance?: string | null
           iban?: string | null
           id?: string
           last_reminder_sent_at?: string | null
@@ -734,16 +744,21 @@ export type Database = {
           address?: string | null
           admin_notes?: string | null
           application_id?: string | null
+          birth_country?: string | null
           birth_date?: string | null
+          birth_name?: string | null
           birth_place?: string | null
           city?: string | null
           contract_signed_at?: string | null
           created_at?: string
+          current_activity?: string | null
           employment_start_date?: string | null
           employment_type?:
             | Database["public"]["Enums"]["employment_type"]
             | null
+          family_status?: string | null
           full_name?: string
+          health_insurance?: string | null
           iban?: string | null
           id?: string
           last_reminder_sent_at?: string | null
