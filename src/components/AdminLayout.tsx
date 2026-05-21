@@ -61,11 +61,12 @@ function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-[#0c0e12] dark:bg-[#0c0e12]">
       <SidebarContent className="flex flex-col h-full">
         {/* Brand */}
-        <div className="px-4 py-4">
-          {!collapsed ? (
-            <span className="text-sm font-semibold text-white/90 tracking-tight">Admin</span>
-          ) : (
-            <div className="h-6 w-6 rounded bg-white/10 mx-auto" />
+        <div className={collapsed ? "px-2 py-4 flex justify-center" : "px-4 py-4 flex items-center gap-2.5"}>
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-white text-base shadow-sm shrink-0">
+            <span aria-hidden>🎭</span>
+          </div>
+          {!collapsed && (
+            <span className="text-[15px] font-bold text-white tracking-tight">ADMIN</span>
           )}
         </div>
 
@@ -82,17 +83,17 @@ function AdminSidebar() {
                         <NavLink
                           to={item.url}
                           end={(item as any).end}
-                          className="relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden"
-                          activeClassName="!bg-white/10 !text-white"
+                          className="relative flex items-center gap-3 px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-white/55 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden"
+                          activeClassName="!bg-primary !text-white shadow-[0_2px_8px_-2px_hsl(var(--primary)/0.6)]"
                         >
-                          <item.icon className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+                          <item.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
                           {!collapsed && <span className="truncate">{item.title}</span>}
                           {count > 0 && (
                             <span
                               className={
                                 collapsed
-                                  ? "absolute top-1 right-1 inline-flex h-3.5 min-w-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-medium items-center justify-center leading-none"
-                                  : "ml-auto inline-flex h-[18px] min-w-[18px] w-auto px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold items-center justify-center leading-none shrink-0"
+                                  ? "absolute top-1 right-1 inline-flex h-3.5 min-w-[14px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-medium items-center justify-center leading-none"
+                                  : "ml-auto inline-flex h-[18px] min-w-[18px] w-auto px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-semibold items-center justify-center leading-none shrink-0"
                               }
                             >
                               {count > 99 ? "99+" : count}
@@ -114,9 +115,9 @@ function AdminSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={signOut}
-                className="text-white/50 hover:text-white hover:bg-white/5 text-[13px]"
+                className="text-white/50 hover:text-white hover:bg-white/5 text-[12.5px] font-medium gap-3 py-2"
               >
-                <LogOut className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+                <LogOut className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
                 {!collapsed && <span>Abmelden</span>}
               </SidebarMenuButton>
             </SidebarMenuItem>
