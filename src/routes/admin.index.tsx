@@ -10,10 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AdminDashboardSkeleton } from "@/components/SkeletonLoaders";
 import {
-  ArrowRight, FileText, ShieldCheck, CalendarDays, Mail, CheckCircle2, XCircle, AlertTriangle, ClipboardList, TrendingUp,
+  ArrowRight, FileText, ShieldCheck, CalendarDays, Mail, CheckCircle2, XCircle, AlertTriangle, ClipboardList,
 } from "lucide-react";
 import { useNavigate } from "@/lib/router-compat";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { computeEmailStats, type EmailLog } from "@/lib/email-stats";
 
