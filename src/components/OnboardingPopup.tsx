@@ -71,11 +71,11 @@ export function OnboardingPopup() {
   const startTour = () => {
     if (user) {
       localStorage.setItem(`${POPUP_KEY}${user.id}`, "true");
-      // Reset tour-key so GuidedOnboarding wieder startet
       localStorage.removeItem(`guided_tour_v2_${user.id}`);
+      // Flag setzen, damit GuidedOnboarding nach Reload startet
+      sessionStorage.setItem(`start_tour_${user.id}`, "1");
     }
     setOpen(false);
-    // Reload damit GuidedOnboarding den Status neu liest und Tour startet
     setTimeout(() => window.location.reload(), 50);
   };
 
