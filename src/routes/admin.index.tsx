@@ -185,63 +185,6 @@ function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-foreground">Conversion-Funnel</p>
-                <p className="text-[10px] text-muted-foreground">Bewerbung bis aktiver Mitarbeiter</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {funnel.map((f) => (
-                <div key={f.label}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">{f.label}</span>
-                    <span className="font-semibold tabular-nums">{f.value} <span className="text-muted-foreground font-normal">({f.pct}%)</span></span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${f.pct}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-accent" />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-foreground">Hängengeblieben</p>
-                <p className="text-[10px] text-muted-foreground">Mitarbeiter abholen, die nicht weiterkommen</p>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              {stuck.map((s) => (
-                <div key={s.label} className="flex items-center justify-between text-xs py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer transition-colors" onClick={() => navigate("/admin/employees")}>
-                  <span className="text-muted-foreground">{s.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`font-semibold tabular-nums ${s.users.length > 0 ? s.color : "text-muted-foreground/50"}`}>{s.users.length}</span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground/40" />
-                  </div>
-                </div>
-              ))}
-              {stuck.every((s) => s.users.length === 0) && (
-                <p className="text-xs text-muted-foreground text-center py-4">Niemand hängt fest 🎉</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       <EmailMonitorWidget />
     </div>
   );
