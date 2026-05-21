@@ -59,7 +59,7 @@ export const createEmployeeAccount = createServerFn({ method: "POST" })
     const newUserId = created.user.id;
 
     // handle_new_user trigger created a profile row. Update it with full data.
-    const profileUpdate: Record<string, unknown> = {
+    const profileUpdate = {
       full_name: data.full_name,
       phone: data.phone || null,
       birth_date: data.birth_date || null,
