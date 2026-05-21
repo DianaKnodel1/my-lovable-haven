@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Download, CheckCircle2, XCircle, Power, Shield } from "lucide-react";
+import { AlertTriangle, Download, CheckCircle2, XCircle, Power, Shield, Mail, User, MapPin, ShieldCheck, FileSignature, CalendarDays, ClipboardList } from "lucide-react";
 import { exportToCsv } from "@/lib/csv-export";
 import { TableSkeleton, PageHeaderSkeleton } from "@/components/SkeletonLoaders";
 import { useToast } from "@/hooks/use-toast";
@@ -21,35 +21,48 @@ import { usePagination } from "@/hooks/use-pagination";
 import { PaginationBar } from "@/components/PaginationBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-type OnbStep = { key: string; label: string; done: boolean };
+type OnbStep = { key: string; label: string; done: boolean; icon: React.ComponentType<{ className?: string }> };
 
-function OnboardingDots({ steps }: { steps: OnbStep[] }) {
+function OnboardingPill({ steps }: { steps: OnbStep[] }) {
   const doneCount = steps.filter((s) => s.done).length;
+  const allDone = doneCount === steps.length;
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="flex items-center gap-1.5">
-        {steps.map((s) => (
-          <Tooltip key={s.key}>
-            <TooltipTrigger asChild>
-              <div
-                className={`h-2 w-2 rounded-full ${s.done ? "bg-accent" : "bg-muted-foreground/25"}`}
-                aria-label={`${s.label}: ${s.done ? "erledigt" : "offen"}`}
-              />
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-[10px]">
-              <p className="font-medium">{s.label}</p>
-              <p className="text-muted-foreground">{s.done ? "Erledigt" : "Offen"}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-        <span className="ml-1 text-[10px] text-muted-foreground tabular-nums">{doneCount}/{steps.length}</span>
+      <div
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 border ${
+          allDone
+            ? "bg-emerald-500/10 border-emerald-500/30"
+            : "bg-muted/40 border-border"
+        }`}
+      >
+        {steps.map((s) => {
+          const Icon = s.icon;
+          return (
+            <Tooltip key={s.key}>
+              <TooltipTrigger asChild>
+                <span
+                  className={`inline-flex items-center justify-center h-4 w-4 ${
+                    s.done ? "text-emerald-500" : "text-muted-foreground/40"
+                  }`}
+                  aria-label={`${s.label}: ${s.done ? "erledigt" : "offen"}`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-[10px]">
+                <p className="font-medium">{s.label}</p>
+                <p className="text-muted-foreground">{s.done ? "Erledigt" : "Offen"}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
       </div>
     </TooltipProvider>
   );
 }
 
 function AdminEmployeesPage() {
-  const { profiles, setProfiles, assignments, adminUserIds, kycList, allBookings, loading, loadData } = useAdminData();
+  const { profiles, setProfiles, assignments, adminUserIds, kycList, allBookings, emailConfirmedUserIds, loading, loadData } = useAdminData();
   const [tenantMap, setTenantMap] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -93,11 +106,13 @@ function AdminEmployeesPage() {
   const assignmentByUser = new Set(assignments.map((a: any) => a.user_id));
 
   const computeSteps = (p: any): OnbStep[] => [
-    { key: "personal", label: "Persönliche Daten", done: !!(p.phone && p.address && p.birth_date) },
-    { key: "kyc", label: "Identität (KYC)", done: kycByUser.get(p.user_id)?.status === "verifiziert" },
-    { key: "contract", label: "Arbeitsvertrag", done: !!p.contract_signed_at },
-    { key: "appointment", label: "Termin gebucht", done: bookingByUser.has(p.user_id) },
-    { key: "task", label: "Auftrag erhalten", done: assignmentByUser.has(p.user_id) },
+    { key: "email", label: "E-Mail bestätigt", done: emailConfirmedUserIds.has(p.user_id), icon: Mail },
+    { key: "personal", label: "Persönliche Daten", done: !!(p.phone && p.address && p.birth_date), icon: User },
+    { key: "address", label: "Adresse", done: !!(p.address || (p.street && p.zip_code && p.city)), icon: MapPin },
+    { key: "kyc", label: "Identität (KYC)", done: kycByUser.get(p.user_id)?.status === "verifiziert", icon: ShieldCheck },
+    { key: "contract", label: "Arbeitsvertrag", done: !!p.contract_signed_at, icon: FileSignature },
+    { key: "appointment", label: "Termin gebucht", done: bookingByUser.has(p.user_id), icon: CalendarDays },
+    { key: "task", label: "Auftrag erhalten", done: assignmentByUser.has(p.user_id), icon: ClipboardList },
   ];
 
   const filtered = profiles.filter((p) => {
@@ -133,6 +148,7 @@ function AdminEmployeesPage() {
             <SelectContent>
               <SelectItem value="all">Alle Status</SelectItem>
               {STATUS_ORDER.map((s) => <SelectItem key={s} value={s}>{STATUS_CONFIG[s].label}</SelectItem>)}
+              <SelectItem value="stuck:email">Hängt: E-Mail</SelectItem>
               <SelectItem value="stuck:personal">Hängt: Persönliche Daten</SelectItem>
               <SelectItem value="stuck:kyc">Hängt: KYC</SelectItem>
               <SelectItem value="stuck:contract">Hängt: Vertrag</SelectItem>
@@ -191,7 +207,7 @@ function AdminEmployeesPage() {
                   </td>
                   <td className="px-5 py-3.5 text-muted-foreground text-xs max-w-[160px] truncate">{(profile as any).tenant_id ? tenantMap[(profile as any).tenant_id] || "–" : "–"}</td>
                   <td className="px-5 py-3.5">
-                    <OnboardingDots steps={computeSteps(profile)} />
+                    <OnboardingPill steps={computeSteps(profile)} />
                   </td>
                   <td className="px-5 py-3.5 text-xs">
                     <span className="text-accent font-medium">{doneCount}</span>
