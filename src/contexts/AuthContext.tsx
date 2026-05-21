@@ -26,43 +26,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAdminRole = (userId: string) => {
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle()
-        .then(({ data }) => {
-          setIsAdmin(!!data);
-        }, () => {
-          setIsAdmin(false);
-        });
+    let cancelled = false;
+
+    const checkAdminRole = async (userId: string): Promise<boolean> => {
+      try {
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        return !!data;
+      } catch {
+        return false;
+      }
+    };
+
+    const applySession = async (nextSession: Session | null) => {
+      if (nextSession?.user) {
+        const admin = await checkAdminRole(nextSession.user.id);
+        if (cancelled) return;
+        setSession(nextSession);
+        setIsAdmin(admin);
+      } else {
+        if (cancelled) return;
+        setSession(null);
+        setIsAdmin(false);
+      }
+      if (!cancelled) setLoading(false);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        if (session?.user) {
-          checkAdminRole(session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
-        setLoading(false);
+      (_event, nextSession) => {
+        // Fire and forget – never await inside the listener.
+        void applySession(nextSession);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      }
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session: initialSession } }) => applySession(initialSession))
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
