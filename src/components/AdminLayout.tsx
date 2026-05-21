@@ -83,7 +83,7 @@ function AdminSidebar() {
                         <NavLink
                           to={item.url}
                           end={(item as any).end}
-                          className="relative flex flex-nowrap items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-white/55 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden whitespace-nowrap"
+                          className="relative !flex !flex-row !flex-nowrap !items-center gap-2.5 px-2.5 !h-auto min-h-9 rounded-lg text-[12.5px] font-medium text-white/55 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden whitespace-nowrap"
                           activeClassName="!bg-primary !text-white shadow-[0_2px_8px_-2px_hsl(var(--primary)/0.6)]"
                         >
                           <item.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
