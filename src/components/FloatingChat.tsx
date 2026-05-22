@@ -235,6 +235,13 @@ export function FloatingChat() {
 
   const isOnChatPage = location.pathname === "/chat";
 
+  // Wenn Admin KI-Chat deaktiviert hat → automatisch in den persönlichen Modus
+  useEffect(() => {
+    if (tenant?.ai_enabled === false && mode === "ai") {
+      setMode("human");
+    }
+  }, [tenant?.ai_enabled, mode]);
+
   // 24h Onboarding-Pulse-Logic
   const pulse24h = (() => {
     if (!createdAt) return false;
