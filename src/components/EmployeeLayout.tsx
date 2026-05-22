@@ -48,7 +48,6 @@ type NavItem = {
   title: string;
   url: string;
   icon: any;
-  color: string;
   requiresActive: boolean;
   dot?: "orange" | "blue" | null;
 };
@@ -59,8 +58,8 @@ function buildNavItems(opts: {
   contractPending: boolean;
 }): NavItem[] {
   const items: NavItem[] = [
-    { title: "Übersicht", url: "/dashboard", icon: LayoutDashboard, color: "text-sky-400", requiresActive: false },
-    { title: "Mitteilungen", url: "/notifications", icon: Bell, color: "text-amber-400", requiresActive: false },
+    { title: "Übersicht", url: "/dashboard", icon: LayoutDashboard, requiresActive: false },
+    { title: "Mitteilungen", url: "/notifications", icon: Bell, requiresActive: false },
   ];
 
   if (opts.kycPending || opts.kycRejected) {
@@ -68,7 +67,6 @@ function buildNavItems(opts: {
       title: "Verifizierung",
       url: "/verification",
       icon: ShieldCheck,
-      color: "text-emerald-400",
       requiresActive: false,
       dot: "orange",
     });
@@ -79,18 +77,17 @@ function buildNavItems(opts: {
       title: "Arbeitsvertrag",
       url: "/contract",
       icon: FileSignature,
-      color: "text-indigo-400",
       requiresActive: false,
       dot: "blue",
     });
   }
 
   items.push(
-    { title: "Termin buchen", url: "/appointments", icon: CalendarDays, color: "text-rose-400", requiresActive: true },
-    { title: "Aufträge", url: "/tasks", icon: ClipboardList, color: "text-violet-400", requiresActive: true },
-    { title: "Upload Center", url: "/documents", icon: UploadCloud, color: "text-cyan-400", requiresActive: false },
-    { title: "SMS", url: "/sms", icon: MessageSquare, color: "text-orange-400", requiresActive: true },
-    { title: "Einstellungen", url: "/settings", icon: Settings, color: "text-slate-400", requiresActive: false },
+    { title: "Termin buchen", url: "/appointments", icon: CalendarDays, requiresActive: true },
+    { title: "Aufträge", url: "/tasks", icon: ClipboardList, requiresActive: true },
+    { title: "Upload Center", url: "/documents", icon: UploadCloud, requiresActive: false },
+    { title: "SMS", url: "/sms", icon: MessageSquare, requiresActive: true },
+    { title: "Einstellungen", url: "/settings", icon: Settings, requiresActive: false },
   );
 
   return items;
@@ -152,7 +149,7 @@ function EmployeeSidebar({
                 const locked = item.requiresActive && !isActive;
                 return (
                   <SidebarMenuItem key={item.title} data-tour={`nav-${item.url.replace("/", "")}`}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild className="h-auto py-0">
                       <NavLink
                         to={locked ? "#" : item.url}
                         end
@@ -168,7 +165,7 @@ function EmployeeSidebar({
                         {locked ? (
                           <Lock className="h-[18px] w-[18px] shrink-0" />
                         ) : (
-                          <item.icon className={cn("h-[18px] w-[18px] shrink-0", item.color)} strokeWidth={2.25} />
+                          <item.icon className="h-[18px] w-[18px] shrink-0 text-sidebar-foreground/70" strokeWidth={2} />
                         )}
                         {!collapsed && <span className="flex-1">{item.title}</span>}
                         {!collapsed && item.dot && (
