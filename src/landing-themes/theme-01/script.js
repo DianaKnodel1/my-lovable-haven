@@ -15,8 +15,11 @@
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(function () {
         status.className = "status success";
-        status.textContent = "Danke! Wir melden uns in Kürze.";
+        status.textContent = "Danke! Du wirst zum Mitarbeiter-Portal weitergeleitet…";
         form.reset();
+        if (window.PORTAL_URL) {
+          setTimeout(function () { window.location.href = window.PORTAL_URL; }, 1200);
+        }
       })
       .catch(function () {
         status.className = "status error";
