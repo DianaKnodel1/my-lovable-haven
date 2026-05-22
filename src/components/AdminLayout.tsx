@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Settings, Phone, Mail, Mailbox, Search, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Settings, Phone, Mail, Mailbox, Search, ShieldCheck, LayoutDashboard, Globe } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminCommandPalette } from "@/components/AdminCommandPalette";
 import { useAdminBadges } from "@/hooks/use-admin-badges";
@@ -36,6 +36,7 @@ const navItems = [
   { title: "Transaktionen", url: "/admin/transactions", icon: Wallet },
   { title: "E-Mail-Logs", url: "/admin/email-logs", icon: Mail },
   { title: "Verträge", url: "/admin/contracts", icon: FileText },
+  { title: "Landing Pages", url: "/admin/landing-generator", icon: Globe },
   { title: "Protokoll", url: "/admin/activity", icon: History },
   { title: "Einstellungen", url: "/admin/settings", icon: Settings },
 ];
