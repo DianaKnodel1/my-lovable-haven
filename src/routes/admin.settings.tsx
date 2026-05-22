@@ -13,8 +13,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { translateAuthError } from "@/lib/auth-errors";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Lock, Save, Palette, CalendarClock } from "lucide-react";
+import { Lock, Save, Palette, CalendarClock, Bot, ClipboardList, ArrowRight } from "lucide-react";
 import { BookingLimitsCard } from "@/components/admin/BookingLimitsCard";
+import { Link } from "@tanstack/react-router";
 
 function AdminSettingsPage() {
   const { toast } = useToast();
@@ -59,6 +60,42 @@ function AdminSettingsPage() {
         </CardHeader>
         <CardContent>
           <ThemeToggle variant="outline" />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Bot className="h-4 w-4" /> KI-Chat für Mitarbeiter
+          </CardTitle>
+          <CardDescription>
+            Aktiviere oder deaktiviere den KI-Assistenten im Mitarbeiter-Portal. Wenn aus, sehen Mitarbeiter nur den persönlichen Kontakt zum Teamleiter.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link to="/admin/ai-settings">
+            <Button variant="outline" className="gap-2">
+              Zu den KI-Einstellungen <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" /> Standard-Auftrag
+          </CardTitle>
+          <CardDescription>
+            Der Standard-Auftrag wird neuen Mitarbeitern automatisch bei der ersten Terminbuchung zugewiesen. Du legst ihn pro Domain unter <strong>Domains</strong> fest (Feld „Standard-Auftrag").
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link to="/admin/tenants">
+            <Button variant="outline" className="gap-2">
+              Zu den Domains <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 

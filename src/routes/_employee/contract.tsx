@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CheckCircle2, Loader2, Download } from "lucide-react";
 import StepContract from "@/components/register/StepContract";
+import { translateDbError } from "@/lib/db-errors";
 
 const EMPLOYMENT_LABELS: Record<string, string> = {
   minijob: "Minijob", teilzeit: "Teilzeit", vollzeit: "Vollzeit",
@@ -64,6 +65,14 @@ function ContractPage() {
       toast({ title: "Fehler", description: "Bitte stimme zu und gib deinen Namen ein.", variant: "destructive" });
       return;
     }
+    if (!profile.employment_type) {
+      toast({
+        title: "Beschäftigungsart fehlt",
+        description: "Deine Beschäftigungsart (Minijob, Teilzeit oder Vollzeit) wurde noch nicht vom Administrator festgelegt. Bitte kontaktiere uns, bevor du den Vertrag unterschreibst.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSigning(true);
     try {
       const now = new Date().toISOString();
@@ -110,7 +119,7 @@ function ContractPage() {
       const { data: contracts } = await supabase.from("contracts").select("*").eq("user_id", user.id).order("signed_at", { ascending: false }).limit(1);
       if (contracts && contracts.length > 0) setContract(contracts[0] as unknown as Contract);
     } catch (err: any) {
-      toast({ title: "Fehler", description: err.message, variant: "destructive" });
+      toast({ title: "Vertrag konnte nicht gespeichert werden", description: translateDbError(err?.message), variant: "destructive" });
     } finally {
       setSigning(false);
     }

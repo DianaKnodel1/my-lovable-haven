@@ -84,11 +84,14 @@ function ModeSelector({
   mode,
   onSelect,
   locked,
+  aiDisabled,
 }: {
   mode: "ai" | "human";
   onSelect: (m: "ai" | "human") => void;
   locked: boolean;
+  aiDisabled?: boolean;
 }) {
+  if (aiDisabled) return null;
   return (
     <div className="flex gap-1 bg-muted/60 rounded-xl p-1 mx-4 mt-3 shrink-0">
       <button
@@ -231,6 +234,13 @@ export function FloatingChat() {
   const typingTimeoutRef = useRef<number | null>(null);
 
   const isOnChatPage = location.pathname === "/chat";
+
+  // Wenn Admin KI-Chat deaktiviert hat → automatisch in den persönlichen Modus
+  useEffect(() => {
+    if (tenant?.ai_enabled === false && mode === "ai") {
+      setMode("human");
+    }
+  }, [tenant?.ai_enabled, mode]);
 
   // 24h Onboarding-Pulse-Logic
   const pulse24h = (() => {
@@ -618,7 +628,7 @@ export function FloatingChat() {
           </div>
 
           {/* Mode Selector */}
-          <ModeSelector mode={mode} onSelect={handleModeSelect} locked={escalated} />
+          <ModeSelector mode={mode} onSelect={handleModeSelect} locked={escalated} aiDisabled={tenant?.ai_enabled === false} />
           <StatusBanner mode={mode} leaderName={leader.name} leaderOnline={!!leader.is_online} escalated={escalated} justResolved={justResolved} />
 
           {/* Messages */}
