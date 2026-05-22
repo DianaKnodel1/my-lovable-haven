@@ -1423,6 +1423,52 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_default_tasks: {
+        Row: {
+          created_at: string
+          id: string
+          sort_order: number
+          task_template_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sort_order: number
+          task_template_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          task_template_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_default_tasks_task_template_id_fkey"
+            columns: ["task_template_id"]
+            isOneToOne: false
+            referencedRelation: "task_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_default_tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_default_tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           ai_enabled: boolean
