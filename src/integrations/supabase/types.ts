@@ -179,6 +179,9 @@ export type Database = {
           assignment_id: string | null
           booking_date: string | null
           booking_time: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_role: string | null
           created_at: string
           id: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -190,6 +193,9 @@ export type Database = {
           assignment_id?: string | null
           booking_date?: string | null
           booking_time?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_by_role?: string | null
           created_at?: string
           id?: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -201,6 +207,9 @@ export type Database = {
           assignment_id?: string | null
           booking_date?: string | null
           booking_time?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_by_role?: string | null
           created_at?: string
           id?: string
           status?: Database["public"]["Enums"]["booking_status"]
