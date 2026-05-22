@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,6 +65,7 @@ function DocumentsPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [category, setCategory] = useState("sonstiges");
   const [file, setFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -223,11 +225,13 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;margin:0}
         category: category as any,
         file_url: path,
         file_name: file.name,
+        notes: notes.trim() || null,
       } as any);
       if (insertErr) throw insertErr;
 
       toast({ title: "Dokument hochgeladen" });
       setFile(null);
+      setNotes("");
       setShowUpload(false);
       loadAll();
     } catch (err: any) {
@@ -298,6 +302,15 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;margin:0}
             <div className="space-y-2">
               <Label>Datei</Label>
               <Input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Notiz (optional)</Label>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Kurze Beschreibung, damit das Dokument zugeordnet werden kann …"
+                rows={3}
+              />
             </div>
             <Button onClick={handleUpload} disabled={!file || uploading} className="w-full gap-2">
               <Upload className="h-4 w-4" />
