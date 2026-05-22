@@ -112,7 +112,6 @@ function EmployeeSidebar({
   const items = buildNavItems({ kycPending, kycRejected, contractPending });
 
   const brandName = "Mitarbeiter-Portal";
-  const brandSubline = tenant?.name ?? "";
   const brandInitial = "M";
 
   return (
@@ -131,9 +130,6 @@ function EmployeeSidebar({
               )}
               <div className="flex flex-col leading-tight min-w-0">
                 <span className="text-sm font-heading font-bold text-sidebar-foreground tracking-tight truncate">{brandName}</span>
-                {brandSubline && (
-                  <span className="text-[10px] text-sidebar-foreground/50 uppercase tracking-wider truncate">{brandSubline}</span>
-                )}
               </div>
             </div>
           ) : (
