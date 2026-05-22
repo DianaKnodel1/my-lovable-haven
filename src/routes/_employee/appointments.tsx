@@ -511,7 +511,7 @@ function AppointmentsPage() {
                       {new Date(b.booking_date + "T00:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" })} {b.booking_time.slice(0, 5)}
                     </span>
                     <Badge variant="secondary" className="text-[9px] bg-destructive/10 text-destructive border-destructive/20">
-                      {b.cancelled_by_role === "admin" ? "Vom Admin storniert" : b.cancelled_by_role === "employee" ? "Von dir storniert" : "Storniert"}
+                      {b.cancelled_by_role === "admin" ? "Vom Teamleiter abgesagt" : b.cancelled_by_role === "employee" ? "Von dir storniert" : "Storniert"}
                     </Badge>
                   </div>
                 ))}

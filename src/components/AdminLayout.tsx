@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Settings, Phone, Mail, Mailbox, Search, ShieldCheck, LayoutDashboard, Globe } from "lucide-react";
+import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Settings, Phone, Mail, Mailbox, Search, ShieldCheck, LayoutDashboard, Globe, Upload } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminCommandPalette } from "@/components/AdminCommandPalette";
 import { useAdminBadges } from "@/hooks/use-admin-badges";
@@ -29,6 +29,7 @@ const navItems = [
   { title: "Aufträge", url: "/admin/tasks", icon: ClipboardList },
   { title: "Prüfungen", url: "/admin/reviews", icon: CheckSquare },
   { title: "Nachbesserungen", url: "/admin/revisions", icon: RotateCcw },
+  { title: "Uploads", url: "/admin/uploads", icon: Upload },
   { title: "Termine", url: "/admin/appointments", icon: CalendarDays },
   { title: "Chat", url: "/admin/chat", icon: MessageCircle, badgeKey: "unreadChat" as const },
   { title: "SMS", url: "/admin/sms", icon: Phone },
