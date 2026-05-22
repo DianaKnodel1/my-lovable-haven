@@ -315,21 +315,18 @@ function AdminAppointmentsPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant={(b as any).admin_override ? "default" : "outline"}
-                          className={cn(
-                            "h-7 px-2 text-[10px]",
-                            (b as any).admin_override
-                              ? "bg-status-success text-status-success-foreground hover:bg-status-success/90"
-                              : "text-foreground hover:bg-muted"
-                          )}
-                          onClick={() => toggleAdminOverride(b.id, !!(b as any).admin_override)}
-                          title={(b as any).admin_override ? "Manuelle Freischaltung entfernen" : "Termin manuell freischalten"}
-                        >
-                          <ShieldCheck className="h-3.5 w-3.5 mr-1" />
-                          {(b as any).admin_override ? "Freigegeben" : "Freischalten"}
-                        </Button>
+                        {!(b as any).admin_override && !b.isReleased && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-[10px] text-foreground hover:bg-muted"
+                            onClick={() => toggleAdminOverride(b.id, false)}
+                            title="Termin manuell freischalten"
+                          >
+                            <ShieldCheck className="h-3.5 w-3.5 mr-1" />
+                            Freischalten
+                          </Button>
+                        )}
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteBooking(b.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
