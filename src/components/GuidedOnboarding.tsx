@@ -118,7 +118,7 @@ function TourView({ onClose }: TourViewProps) {
     };
     find();
     return () => { if (findTimeoutRef.current) window.clearTimeout(findTimeoutRef.current); };
-  }, [stepIdx, location.pathname, tick, routeReady]);
+  }, [stepIdx, location.pathname, tick, routeReady, step.target]);
 
   // Recompute on resize/scroll
   useEffect(() => {
