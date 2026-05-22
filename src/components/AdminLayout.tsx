@@ -13,13 +13,14 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Globe, Settings, Phone, Sparkles, Mail, Palette, Mailbox, Search, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { LayoutGrid, FileText, Users, ClipboardList, CheckSquare, CalendarDays, Wallet, LogOut, MessageCircle, RotateCcw, History, Settings, Phone, Mail, Mailbox, Search, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminCommandPalette } from "@/components/AdminCommandPalette";
 import { useAdminBadges } from "@/hooks/use-admin-badges";
 import { useEffect } from "react";
 
-// Flache, minimale Navigation – wie im Referenz-Screenshot.
+// Schlanke operative Navigation. Setup-Bereiche (Domains, KI, Teamleiter, E-Mail-Vorlagen,
+// Standard-Aufträge, Buchungslimits, Passwort) liegen unter /admin/settings.
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
   { title: "Bewerbungen", url: "/admin/applications", icon: FileText, badgeKey: "newApplications" as const },
@@ -33,11 +34,8 @@ const navItems = [
   { title: "SMS", url: "/admin/sms", icon: Phone },
   { title: "Post", url: "/admin/post", icon: Mailbox },
   { title: "Transaktionen", url: "/admin/transactions", icon: Wallet },
-  { title: "E-Mail Templates", url: "/admin/email-templates", icon: Palette },
-  { title: "E-Mail Monitoring", url: "/admin/email-logs", icon: Mail },
+  { title: "E-Mail-Logs", url: "/admin/email-logs", icon: Mail },
   { title: "Verträge", url: "/admin/contracts", icon: FileText },
-  { title: "Domains", url: "/admin/tenants", icon: Globe },
-  { title: "KI-Antworten", url: "/admin/ai-settings", icon: Sparkles },
   { title: "Protokoll", url: "/admin/activity", icon: History },
   { title: "Einstellungen", url: "/admin/settings", icon: Settings },
 ];
@@ -58,15 +56,15 @@ function AdminSidebar() {
   const badges = useAdminBadges();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-[#0c0e12] dark:bg-[#0c0e12]">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       <SidebarContent className="flex flex-col h-full">
         {/* Brand */}
         <div className={collapsed ? "px-2 py-4 flex justify-center" : "px-4 py-4 flex items-center gap-2.5"}>
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-white text-base shadow-sm shrink-0">
-            <span aria-hidden>🎭</span>
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 grid place-items-center text-white text-sm font-bold shadow-sm shrink-0">
+            A
           </div>
           {!collapsed && (
-            <span className="text-[15px] font-bold text-white tracking-tight">ADMIN</span>
+            <span className="text-[15px] font-bold text-sidebar-foreground tracking-tight">ADMIN</span>
           )}
         </div>
 
@@ -83,8 +81,8 @@ function AdminSidebar() {
                         <NavLink
                           to={item.url}
                           end={(item as any).end}
-                          className="relative flex! flex-row! flex-nowrap! items-center! gap-2.5 px-2.5 h-auto! min-h-9 rounded-lg text-[12.5px] font-medium text-white/55 hover:bg-white/5 hover:text-white/90 transition-colors overflow-hidden whitespace-nowrap"
-                          activeClassName="bg-primary! text-white! shadow-[0_2px_8px_-2px_hsl(var(--primary)/0.6)]"
+                          className="relative flex! flex-row! flex-nowrap! items-center! gap-2.5 px-2.5 h-auto! min-h-9 rounded-lg text-[12.5px] font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors overflow-hidden whitespace-nowrap"
+                          activeClassName="bg-blue-600! text-white! shadow-[0_2px_8px_-2px_rgba(37,99,235,0.45)] hover:bg-blue-600!"
                         >
                           <item.icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
                           {!collapsed && <span className="truncate min-w-0">{item.title}</span>}
@@ -110,12 +108,12 @@ function AdminSidebar() {
         </div>
 
         {/* Logout */}
-        <div className="border-t border-white/5 p-2">
+        <div className="border-t border-sidebar-border p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={signOut}
-                className="text-white/50 hover:text-white hover:bg-white/5 text-[12.5px] font-medium gap-3 py-2"
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent text-[12.5px] font-medium gap-3 py-2"
               >
                 <LogOut className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
                 {!collapsed && <span>Abmelden</span>}
