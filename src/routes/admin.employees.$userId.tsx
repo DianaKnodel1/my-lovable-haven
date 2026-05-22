@@ -328,11 +328,11 @@ function AdminEmployeeDetailPage() {
               {(profile as any).previous_address && (
                 <InfoRow label="Vorherige Adresse" value={(profile as any).previous_address} />
               )}
-              <InfoRow label="Beschäftigungsart" value={
-                  (profile as any).employment_type === "minijob" ? "Minijob" :
-                  (profile as any).employment_type === "teilzeit" ? "Teilzeit" :
-                  (profile as any).employment_type === "vollzeit" ? "Vollzeit" : "—"
-                } />
+              <EmploymentTypeRow
+                userId={userId!}
+                value={(profile as any).employment_type ?? null}
+                onChange={(v) => setProfiles((prev) => prev.map((p) => (p.user_id === userId ? ({ ...p, employment_type: v } as any) : p)))}
+              />
                 <InfoRow label="Steuer-Nr." value={(profile as any).tax_number || "—"} />
                 <InfoRow label="SV-Nr." value={(profile as any).social_security_number || "—"} />
                 <InfoRow label="IBAN" value={(profile as any).iban || "—"} />
@@ -718,6 +718,42 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between items-start text-xs py-1">
       <span className="text-muted-foreground shrink-0">{label}</span>
       <span className="text-foreground font-medium text-right ml-4 break-words">{value}</span>
+    </div>
+  );
+}
+
+function EmploymentTypeRow({ userId, value, onChange }: { userId: string; value: string | null; onChange: (v: string) => void }) {
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
+
+  const save = async (val: string) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ employment_type: val as any } as any)
+      .eq("user_id", userId);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Fehler", description: error.message, variant: "destructive" });
+      return;
+    }
+    onChange(val);
+    toast({ title: "Beschäftigungsart aktualisiert" });
+  };
+
+  return (
+    <div className="flex justify-between items-center text-xs py-1 gap-3">
+      <span className="text-muted-foreground shrink-0">Beschäftigungsart</span>
+      <Select value={value ?? ""} onValueChange={save} disabled={saving}>
+        <SelectTrigger className="h-7 text-xs w-[140px]">
+          <SelectValue placeholder="Nicht gesetzt" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="minijob">Minijob</SelectItem>
+          <SelectItem value="teilzeit">Teilzeit</SelectItem>
+          <SelectItem value="vollzeit">Vollzeit</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
