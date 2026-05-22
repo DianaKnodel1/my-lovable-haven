@@ -89,7 +89,6 @@ function buildNavItems(opts: {
     { title: "Termin buchen", url: "/appointments", icon: CalendarDays, color: "text-rose-400", requiresActive: true },
     { title: "Aufträge", url: "/tasks", icon: ClipboardList, color: "text-violet-400", requiresActive: true },
     { title: "Upload Center", url: "/documents", icon: UploadCloud, color: "text-cyan-400", requiresActive: false },
-    { title: "Einnahmen", url: "/earnings", icon: Wallet, color: "text-emerald-500", requiresActive: true },
     { title: "SMS", url: "/sms", icon: MessageSquare, color: "text-orange-400", requiresActive: true },
     { title: "Einstellungen", url: "/settings", icon: Settings, color: "text-slate-400", requiresActive: false },
   );
