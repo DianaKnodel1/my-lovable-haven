@@ -54,17 +54,17 @@ function AdminKycPage() {
     setSelectedKyc(null);
   };
 
-  if (loading) return <div className="p-5 space-y-4"><PageHeaderSkeleton /><TableSkeleton rows={4} cols={4} /></div>;
-
   const filtered = kycList.filter((k) => {
     if (filterStatus && filterStatus !== "all" && k.status !== filterStatus) return false;
     if (search) {
       const profile = getProfileForUser(k.user_id);
-      if (!profile?.full_name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (!profile?.full_name?.toLowerCase().includes(search.toLowerCase())) return false;
     }
     return true;
   });
   const { paged, page, setPage, pageCount, rangeFrom, rangeTo, total } = usePagination(filtered, 25);
+
+  if (loading) return <div className="p-5 space-y-4"><PageHeaderSkeleton /><TableSkeleton rows={4} cols={4} /></div>;
 
   return (
     <div className="p-5 space-y-4">
