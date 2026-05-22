@@ -13,7 +13,6 @@ import { type EmployeeStatus, type KycStatus, type OnboardingStatus } from "@/li
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
   FileText, GraduationCap, ClipboardList, CalendarDays,
@@ -30,18 +29,6 @@ interface Transaction {
   status: "ausstehend" | "genehmigt" | "gutgeschrieben" | "ausgezahlt" | string;
   created_at: string;
   assignment_id: string | null;
-}
-
-function formatRelativeTime(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "gerade eben";
-  if (mins < 60) return `vor ${mins} Min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `vor ${hours} Std`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `vor ${days} Tag${days === 1 ? "" : "en"}`;
-  return new Date(dateStr).toLocaleDateString("de-DE", { day: "numeric", month: "short" });
 }
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
