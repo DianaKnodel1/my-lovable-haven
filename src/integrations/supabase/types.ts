@@ -1151,6 +1151,7 @@ export type Database = {
           individual_case_number: string | null
           individual_email: string | null
           individual_hint: string | null
+          individual_instructions: string | null
           individual_password: string | null
           individual_phone: string | null
           post_ident_pdf_name: string | null
@@ -1169,6 +1170,7 @@ export type Database = {
           individual_case_number?: string | null
           individual_email?: string | null
           individual_hint?: string | null
+          individual_instructions?: string | null
           individual_password?: string | null
           individual_phone?: string | null
           post_ident_pdf_name?: string | null
@@ -1187,6 +1189,7 @@ export type Database = {
           individual_case_number?: string | null
           individual_email?: string | null
           individual_hint?: string | null
+          individual_instructions?: string | null
           individual_password?: string | null
           individual_phone?: string | null
           post_ident_pdf_name?: string | null
