@@ -68,7 +68,8 @@ export function AssignmentIndividualData({ assignmentId, userId, initial, templa
       return;
     }
     setUploading(true);
-    const path = `post-ident/${userId}/${assignmentId}-${Date.now()}-${file.name}`;
+    // Erste Ordner-Ebene MUSS die userId sein, damit RLS dem Mitarbeiter Lesezugriff erlaubt.
+    const path = `${userId}/post-ident/${assignmentId}-${Date.now()}-${file.name}`;
     const { error: upErr } = await supabase.storage.from("employee-documents").upload(path, file, {
       cacheControl: "3600",
       upsert: false,
