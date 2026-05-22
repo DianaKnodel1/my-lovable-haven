@@ -18,11 +18,10 @@ import { Input } from "@/components/ui/input";
 import {
   FileText, GraduationCap, ClipboardList, CalendarDays,
   Wallet, ArrowRight, CheckCircle2, Clock,
-  Lock, Circle, Timer, PartyPopper, TrendingUp, MessageCircle, Send,
+  Lock, Circle, Timer, PartyPopper, TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNextStep } from "@/hooks/use-next-step";
-import { useTeamLeader } from "@/hooks/use-team-leader";
 import { useToast } from "@/hooks/use-toast";
 
 interface Transaction {
@@ -31,13 +30,6 @@ interface Transaction {
   status: "ausstehend" | "genehmigt" | "gutgeschrieben" | "ausgezahlt" | string;
   created_at: string;
   assignment_id: string | null;
-}
-
-interface DashboardChatMessage {
-  id: string;
-  sender_id: string;
-  message: string;
-  created_at: string;
 }
 
 function formatRelativeTime(dateStr: string) {
@@ -77,7 +69,6 @@ interface Profile {
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { leader, initials: leaderInitials } = useTeamLeader();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [kyc, setKyc] = useState<{ status: KycStatus } | null>(null);
   const [nextBookingDate, setNextBookingDate] = useState<string | null>(null);
@@ -88,9 +79,6 @@ function DashboardPage() {
   const [taskCount, setTaskCount] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
   const [recentTx, setRecentTx] = useState<Transaction[]>([]);
-  const [chatMessages, setChatMessages] = useState<DashboardChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [sendingChat, setSendingChat] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scheduledTask, setScheduledTask] = useState<{ releaseAt: string } | null>(null);
@@ -110,14 +98,13 @@ function DashboardPage() {
     if (authLoading || !user) return;
     const load = async () => {
       try {
-        const [profileRes, kycRes, bookingsRes, txRes, assignRes, completedRes, chatRes] = await Promise.all([
+        const [profileRes, kycRes, bookingsRes, txRes, assignRes, completedRes] = await Promise.all([
           supabase.from("profiles").select("full_name, status, contract_signed_at, onboarding_status, team_leader_id, created_at, address, birth_date, street, zip_code, city, employment_type").eq("user_id", user.id).maybeSingle(),
           supabase.from("kyc_verifications").select("status").eq("user_id", user.id).maybeSingle(),
           supabase.from("bookings").select("id, booking_date, booking_time, status").eq("user_id", user.id).neq("status", "storniert").not("booking_date", "is", null).order("booking_date", { ascending: true }),
           supabase.from("user_transactions").select("id, amount, status, created_at, assignment_id").eq("user_id", user.id).order("created_at", { ascending: false }),
           supabase.from("task_assignments").select("id").eq("user_id", user.id).in("status", ["zugewiesen", "in_bearbeitung"]),
           supabase.from("task_assignments").select("id").eq("user_id", user.id).in("status", ["genehmigt", "abgeschlossen"]),
-          supabase.from("chat_messages").select("id, sender_id, message, created_at").or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order("created_at", { ascending: false }).limit(4),
         ]);
         if (profileRes.error) throw profileRes.error;
         setProfile(profileRes.data as Profile | null);
@@ -142,7 +129,6 @@ function DashboardPage() {
         setRecentTx(txData.slice(0, 5));
         setTaskCount(assignRes.data?.length ?? 0);
         setCompletedTasks(completedRes.data?.length ?? 0);
-        setChatMessages(((chatRes.data ?? []) as DashboardChatMessage[]).reverse());
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -151,43 +137,6 @@ function DashboardPage() {
     };
     load();
   }, [user, authLoading]);
-
-  // Realtime: neue Chat-Nachrichten direkt im Dashboard-Widget
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(`dashboard-chat-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages", filter: `receiver_id=eq.${user.id}` },
-        (payload) => {
-          const m = payload.new as DashboardChatMessage;
-          setChatMessages((prev) => [...prev, m].slice(-4));
-        }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user]);
-
-  const handleSendChat = async () => {
-    const leaderId = profile?.team_leader_id;
-    if (!user || !chatInput.trim() || !leaderId) return;
-    setSendingChat(true);
-    const text = chatInput.trim();
-    setChatInput("");
-    const { data, error: sendErr } = await supabase
-      .from("chat_messages")
-      .insert({ sender_id: user.id, receiver_id: leaderId, message: text })
-      .select("id, sender_id, message, created_at")
-      .single();
-    if (sendErr) {
-      toast({ title: "Senden fehlgeschlagen", description: sendErr.message, variant: "destructive" });
-      setChatInput(text);
-    } else if (data) {
-      setChatMessages((prev) => [...prev, data as DashboardChatMessage].slice(-4));
-    }
-    setSendingChat(false);
-  };
 
   const handleCancelBooking = async (id: string) => {
     const { error: cancelErr } = await supabase.from("bookings").update({ status: "storniert" as any }).eq("id", id);
