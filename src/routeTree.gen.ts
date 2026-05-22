@@ -26,6 +26,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminRevisionsRouteImport } from './routes/admin.revisions'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminPostRouteImport } from './routes/admin.post'
+import { Route as AdminLandingGeneratorRouteImport } from './routes/admin.landing-generator'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminEmailTemplatesRouteImport } from './routes/admin.email-templates'
 import { Route as AdminEmailLogsRouteImport } from './routes/admin.email-logs'
@@ -49,6 +50,7 @@ import { Route as EmployeeAppointmentsRouteImport } from './routes/_employee/app
 import { Route as AdminTasksIndexRouteImport } from './routes/admin.tasks.index'
 import { Route as AdminEmployeesIndexRouteImport } from './routes/admin.employees.index'
 import { Route as AdminApplicationsIndexRouteImport } from './routes/admin.applications.index'
+import { Route as ApiPublicApplicationsRouteImport } from './routes/api/public/applications'
 import { Route as AdminEmployeesUserIdRouteImport } from './routes/admin.employees.$userId'
 import { Route as AdminAssignmentsAssignmentIdRouteImport } from './routes/admin.assignments.$assignmentId'
 import { Route as AdminApplicationsAppIdRouteImport } from './routes/admin.applications.$appId'
@@ -137,6 +139,11 @@ const AdminReviewsRoute = AdminReviewsRouteImport.update({
 const AdminPostRoute = AdminPostRouteImport.update({
   id: '/post',
   path: '/post',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLandingGeneratorRoute = AdminLandingGeneratorRouteImport.update({
+  id: '/landing-generator',
+  path: '/landing-generator',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminKycRoute = AdminKycRouteImport.update({
@@ -254,6 +261,11 @@ const AdminApplicationsIndexRoute = AdminApplicationsIndexRouteImport.update({
   path: '/applications/',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicApplicationsRoute = ApiPublicApplicationsRouteImport.update({
+  id: '/api/public/applications',
+  path: '/api/public/applications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEmployeesUserIdRoute = AdminEmployeesUserIdRouteImport.update({
   id: '/employees/$userId',
   path: '/employees/$userId',
@@ -311,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/admin/email-logs': typeof AdminEmailLogsRoute
   '/admin/email-templates': typeof AdminEmailTemplatesRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/landing-generator': typeof AdminLandingGeneratorRoute
   '/admin/post': typeof AdminPostRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/revisions': typeof AdminRevisionsRoute
@@ -324,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/admin/applications/$appId': typeof AdminApplicationsAppIdRoute
   '/admin/assignments/$assignmentId': typeof AdminAssignmentsAssignmentIdRoute
   '/admin/employees/$userId': typeof AdminEmployeesUserIdRoute
+  '/api/public/applications': typeof ApiPublicApplicationsRoute
   '/admin/applications/': typeof AdminApplicationsIndexRoute
   '/admin/employees/': typeof AdminEmployeesIndexRoute
   '/admin/tasks/': typeof AdminTasksIndexRoute
@@ -356,6 +370,7 @@ export interface FileRoutesByTo {
   '/admin/email-logs': typeof AdminEmailLogsRoute
   '/admin/email-templates': typeof AdminEmailTemplatesRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/landing-generator': typeof AdminLandingGeneratorRoute
   '/admin/post': typeof AdminPostRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/revisions': typeof AdminRevisionsRoute
@@ -369,6 +384,7 @@ export interface FileRoutesByTo {
   '/admin/applications/$appId': typeof AdminApplicationsAppIdRoute
   '/admin/assignments/$assignmentId': typeof AdminAssignmentsAssignmentIdRoute
   '/admin/employees/$userId': typeof AdminEmployeesUserIdRoute
+  '/api/public/applications': typeof ApiPublicApplicationsRoute
   '/admin/applications': typeof AdminApplicationsIndexRoute
   '/admin/employees': typeof AdminEmployeesIndexRoute
   '/admin/tasks': typeof AdminTasksIndexRoute
@@ -404,6 +420,7 @@ export interface FileRoutesById {
   '/admin/email-logs': typeof AdminEmailLogsRoute
   '/admin/email-templates': typeof AdminEmailTemplatesRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/landing-generator': typeof AdminLandingGeneratorRoute
   '/admin/post': typeof AdminPostRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/revisions': typeof AdminRevisionsRoute
@@ -417,6 +434,7 @@ export interface FileRoutesById {
   '/admin/applications/$appId': typeof AdminApplicationsAppIdRoute
   '/admin/assignments/$assignmentId': typeof AdminAssignmentsAssignmentIdRoute
   '/admin/employees/$userId': typeof AdminEmployeesUserIdRoute
+  '/api/public/applications': typeof ApiPublicApplicationsRoute
   '/admin/applications/': typeof AdminApplicationsIndexRoute
   '/admin/employees/': typeof AdminEmployeesIndexRoute
   '/admin/tasks/': typeof AdminTasksIndexRoute
@@ -452,6 +470,7 @@ export interface FileRouteTypes {
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/kyc'
+    | '/admin/landing-generator'
     | '/admin/post'
     | '/admin/reviews'
     | '/admin/revisions'
@@ -465,6 +484,7 @@ export interface FileRouteTypes {
     | '/admin/applications/$appId'
     | '/admin/assignments/$assignmentId'
     | '/admin/employees/$userId'
+    | '/api/public/applications'
     | '/admin/applications/'
     | '/admin/employees/'
     | '/admin/tasks/'
@@ -497,6 +517,7 @@ export interface FileRouteTypes {
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/kyc'
+    | '/admin/landing-generator'
     | '/admin/post'
     | '/admin/reviews'
     | '/admin/revisions'
@@ -510,6 +531,7 @@ export interface FileRouteTypes {
     | '/admin/applications/$appId'
     | '/admin/assignments/$assignmentId'
     | '/admin/employees/$userId'
+    | '/api/public/applications'
     | '/admin/applications'
     | '/admin/employees'
     | '/admin/tasks'
@@ -544,6 +566,7 @@ export interface FileRouteTypes {
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/kyc'
+    | '/admin/landing-generator'
     | '/admin/post'
     | '/admin/reviews'
     | '/admin/revisions'
@@ -557,6 +580,7 @@ export interface FileRouteTypes {
     | '/admin/applications/$appId'
     | '/admin/assignments/$assignmentId'
     | '/admin/employees/$userId'
+    | '/api/public/applications'
     | '/admin/applications/'
     | '/admin/employees/'
     | '/admin/tasks/'
@@ -572,6 +596,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  ApiPublicApplicationsRoute: typeof ApiPublicApplicationsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -693,6 +718,13 @@ declare module '@tanstack/react-router' {
       path: '/post'
       fullPath: '/admin/post'
       preLoaderRoute: typeof AdminPostRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/landing-generator': {
+      id: '/admin/landing-generator'
+      path: '/landing-generator'
+      fullPath: '/admin/landing-generator'
+      preLoaderRoute: typeof AdminLandingGeneratorRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/kyc': {
@@ -856,6 +888,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApplicationsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/applications': {
+      id: '/api/public/applications'
+      path: '/api/public/applications'
+      fullPath: '/api/public/applications'
+      preLoaderRoute: typeof ApiPublicApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/employees/$userId': {
       id: '/admin/employees/$userId'
       path: '/employees/$userId'
@@ -949,6 +988,7 @@ interface AdminRouteChildren {
   AdminEmailLogsRoute: typeof AdminEmailLogsRoute
   AdminEmailTemplatesRoute: typeof AdminEmailTemplatesRoute
   AdminKycRoute: typeof AdminKycRoute
+  AdminLandingGeneratorRoute: typeof AdminLandingGeneratorRoute
   AdminPostRoute: typeof AdminPostRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminRevisionsRoute: typeof AdminRevisionsRoute
@@ -976,6 +1016,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEmailLogsRoute: AdminEmailLogsRoute,
   AdminEmailTemplatesRoute: AdminEmailTemplatesRoute,
   AdminKycRoute: AdminKycRoute,
+  AdminLandingGeneratorRoute: AdminLandingGeneratorRoute,
   AdminPostRoute: AdminPostRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminRevisionsRoute: AdminRevisionsRoute,
@@ -1005,6 +1046,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  ApiPublicApplicationsRoute: ApiPublicApplicationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
