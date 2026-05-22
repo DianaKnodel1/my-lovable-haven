@@ -201,6 +201,11 @@ function AdminUploadsPage() {
                         {row.kind === "document" && <Badge variant="outline" className="text-[10px] h-5 px-1.5">Dokument</Badge>}
                         {row.kind === "submission" && <Badge variant="outline" className="text-[10px] h-5 px-1.5">Einreichung</Badge>}
                       </div>
+                      {row.notes && (
+                        <p className="text-[11px] text-muted-foreground mt-1 italic max-w-[280px] line-clamp-2" title={row.notes}>
+                          💬 {row.notes}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant="secondary" className={statusBadgeClass(statusColor)}>{statusLabel}</Badge>
