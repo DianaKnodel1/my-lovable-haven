@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Download, FileText, Phone, Info } from "lucide-react";
+import { Copy, Download, FileText, Phone, Info, Loader2 } from "lucide-react";
 
 interface Props {
   data: {
@@ -17,18 +17,26 @@ interface Props {
 export function AssignmentIndividualDataView({ data }: Props) {
   const { toast } = useToast();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
+    setPdfUrl(null);
+    if (!data.post_ident_pdf_url) return;
+    setPdfLoading(true);
     (async () => {
-      if (!data.post_ident_pdf_url) { setPdfUrl(null); return; }
-      const { data: signed } = await supabase.storage
+      const { data: signed, error } = await supabase.storage
         .from("employee-documents")
-        .createSignedUrl(data.post_ident_pdf_url, 3600);
-      if (active) setPdfUrl(signed?.signedUrl ?? null);
+        .createSignedUrl(data.post_ident_pdf_url!, 3600);
+      if (!active) return;
+      if (error) {
+        toast({ title: "PDF konnte nicht geladen werden", description: error.message, variant: "destructive" });
+      }
+      setPdfUrl(signed?.signedUrl ?? null);
+      setPdfLoading(false);
     })();
     return () => { active = false; };
-  }, [data.post_ident_pdf_url]);
+  }, [data.post_ident_pdf_url, toast]);
 
   const hasAny = data.individual_phone || data.individual_hint || data.post_ident_pdf_url;
   if (!hasAny) return null;
@@ -72,13 +80,15 @@ export function AssignmentIndividualDataView({ data }: Props) {
               <span className="truncate">{data.post_ident_pdf_name ?? "Post-Ident PDF"}</span>
             </div>
             {pdfUrl ? (
-              <Button asChild size="sm" variant="outline" className="h-8">
-                <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download>
+              <Button asChild size="sm" className="h-8">
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download={data.post_ident_pdf_name ?? "post-ident.pdf"}>
                   <Download className="h-3.5 w-3.5 mr-1" /> Download
                 </a>
               </Button>
             ) : (
-              <span className="text-xs text-muted-foreground">Lade…</span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                {pdfLoading && <Loader2 className="h-3 w-3 animate-spin" />} Lade…
+              </span>
             )}
           </div>
         )}

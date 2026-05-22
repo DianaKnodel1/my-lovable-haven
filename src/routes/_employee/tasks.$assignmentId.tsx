@@ -446,7 +446,7 @@ function TaskWizardPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <InfoBox variant="info">
                   <p className="font-medium">Vergütung</p>
-                  <p className="text-accent font-bold text-lg mt-1">{Number(tpl.compensation).toFixed(2)} €</p>
+                  <p className="font-bold text-2xl mt-1 text-white drop-shadow-sm">{Number(tpl.compensation).toFixed(2).replace(".", ",")} €</p>
                 </InfoBox>
                 <InfoBox variant="hint">
                   <p className="font-medium">So funktioniert's</p>
@@ -657,7 +657,7 @@ function TaskWizardPage() {
               </div>
               <h2 className="text-2xl font-heading font-bold text-foreground">Auftrag eingereicht! 🎉</h2>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Dein Auftrag wird jetzt geprüft. Die Vergütung von <strong className="text-accent">{Number(tpl.compensation).toFixed(2)} €</strong> wird
+                Dein Auftrag wird jetzt geprüft. Die Vergütung von <strong className="text-foreground">{Number(tpl.compensation).toFixed(2).replace(".", ",")} €</strong> wird
                 nach Genehmigung gutgeschrieben.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
@@ -747,7 +747,7 @@ function TaskWizardPage() {
             </div>
             <div className="flex flex-col items-center text-center">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Vergütung</p>
-              <div className="h-12 w-12 rounded-full bg-accent/10 border-2 border-accent flex items-center justify-center text-[10px] font-bold text-accent leading-tight">
+              <div className="h-12 w-12 rounded-full bg-emerald-500 border-2 border-emerald-600 flex items-center justify-center text-[11px] font-bold text-white leading-tight shadow-sm">
                 €{Number(tpl.compensation).toFixed(0)}
               </div>
             </div>

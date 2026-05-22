@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState } from "@/components/EmptyState";
-import { CheckCircle2, XCircle, CheckSquare } from "lucide-react";
+import { CheckCircle2, XCircle, CheckSquare, FileText, Download } from "lucide-react";
 import { TableSkeleton, PageHeaderSkeleton } from "@/components/SkeletonLoaders";
 
 function AdminReviewsPage() {
@@ -171,12 +171,41 @@ function AdminReviewsPage() {
                       <p className="text-sm text-foreground whitespace-pre-wrap">{reviewSubmission.notes}</p>
                     </div>
                   )}
-                  {reviewFileUrls.length > 0 && (
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Dateien</p>
-                      {reviewFileUrls.map((url, i) => <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline block">Datei {i + 1}</a>)}
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Hochgeladene Dateien ({reviewFileUrls.length})
+                    </p>
+                    {reviewFileUrls.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic">Keine Dateien hochgeladen.</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {reviewFileUrls.map((url, i) => {
+                          const path = (reviewSubmission!.file_urls ?? [])[i] ?? "";
+                          const name = path.split("/").pop() ?? `Datei ${i + 1}`;
+                          const isImg = /\.(png|jpe?g|gif|webp)$/i.test(name);
+                          return (
+                            <div key={i} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 p-2.5">
+                              <div className="flex items-center gap-2 min-w-0">
+                                {isImg ? (
+                                  <img src={url} alt={name} className="h-10 w-10 rounded object-cover border border-border shrink-0" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center shrink-0">
+                                    <FileText className="h-5 w-5 text-primary" />
+                                  </div>
+                                )}
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground hover:text-primary truncate">{name}</a>
+                              </div>
+                              <Button asChild size="sm" variant="outline" className="h-8 shrink-0">
+                                <a href={url} target="_blank" rel="noopener noreferrer" download={name}>
+                                  <Download className="h-3.5 w-3.5 mr-1" /> Öffnen
+                                </a>
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : <p className="text-sm text-muted-foreground">Keine Einreichung vorhanden.</p>}
 
