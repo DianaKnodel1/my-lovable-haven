@@ -169,7 +169,7 @@ function TasksPage() {
         <td className="py-4 px-4">
           <Badge variant="secondary" className={cn("text-[10px]", st.bg, st.color)}>{st.label}</Badge>
         </td>
-        <td className="py-4 px-4 text-right font-bold text-accent text-sm tabular-nums">
+        <td className="py-4 px-4 text-right font-bold text-foreground text-sm tabular-nums">
           {Number(tpl.compensation).toFixed(2).replace(".", ",")} €
         </td>
         <td className="py-4 px-4 text-right w-32">
