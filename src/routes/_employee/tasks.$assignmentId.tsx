@@ -217,7 +217,7 @@ function TaskWizardPage() {
       setAssignment(a);
 
       const [bookingRes, stepsRes, questionsRes, progressRes, feedbackRes] = await Promise.all([
-        supabase.from("bookings").select("id").eq("user_id", user!.id).eq("assignment_id", assignmentId!),
+        supabase.from("bookings").select("id, status").eq("user_id", user!.id).eq("assignment_id", assignmentId!).neq("status", "storniert"),
         supabase.from("task_steps").select("*").eq("task_template_id", a.task_template_id).order("step_number"),
         supabase.from("task_questions").select("*").eq("task_template_id", a.task_template_id).order("sort_order"),
         supabase.from("task_progress").select("*").eq("assignment_id", assignmentId!).maybeSingle(),
