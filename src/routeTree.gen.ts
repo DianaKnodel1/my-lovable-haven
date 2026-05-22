@@ -18,6 +18,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EmployeeRouteImport } from './routes/_employee'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminUploadsRouteImport } from './routes/admin.uploads'
 import { Route as AdminTransactionsRouteImport } from './routes/admin.transactions'
 import { Route as AdminTenantsRouteImport } from './routes/admin.tenants'
 import { Route as AdminTeamLeaderSettingsRouteImport } from './routes/admin.team-leader-settings'
@@ -100,6 +101,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUploadsRoute = AdminUploadsRouteImport.update({
+  id: '/uploads',
+  path: '/uploads',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTransactionsRoute = AdminTransactionsRouteImport.update({
@@ -339,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/admin/team-leader-settings': typeof AdminTeamLeaderSettingsRoute
   '/admin/tenants': typeof AdminTenantsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
+  '/admin/uploads': typeof AdminUploadsRoute
   '/admin/': typeof AdminIndexRoute
   '/tasks/$assignmentId': typeof EmployeeTasksAssignmentIdRoute
   '/admin/applications/$appId': typeof AdminApplicationsAppIdRoute
@@ -387,6 +394,7 @@ export interface FileRoutesByTo {
   '/admin/team-leader-settings': typeof AdminTeamLeaderSettingsRoute
   '/admin/tenants': typeof AdminTenantsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
+  '/admin/uploads': typeof AdminUploadsRoute
   '/admin': typeof AdminIndexRoute
   '/tasks/$assignmentId': typeof EmployeeTasksAssignmentIdRoute
   '/admin/applications/$appId': typeof AdminApplicationsAppIdRoute
@@ -438,6 +446,7 @@ export interface FileRoutesById {
   '/admin/team-leader-settings': typeof AdminTeamLeaderSettingsRoute
   '/admin/tenants': typeof AdminTenantsRoute
   '/admin/transactions': typeof AdminTransactionsRoute
+  '/admin/uploads': typeof AdminUploadsRoute
   '/admin/': typeof AdminIndexRoute
   '/_employee/tasks/$assignmentId': typeof EmployeeTasksAssignmentIdRoute
   '/admin/applications/$appId': typeof AdminApplicationsAppIdRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/admin/team-leader-settings'
     | '/admin/tenants'
     | '/admin/transactions'
+    | '/admin/uploads'
     | '/admin/'
     | '/tasks/$assignmentId'
     | '/admin/applications/$appId'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/admin/team-leader-settings'
     | '/admin/tenants'
     | '/admin/transactions'
+    | '/admin/uploads'
     | '/admin'
     | '/tasks/$assignmentId'
     | '/admin/applications/$appId'
@@ -587,6 +598,7 @@ export interface FileRouteTypes {
     | '/admin/team-leader-settings'
     | '/admin/tenants'
     | '/admin/transactions'
+    | '/admin/uploads'
     | '/admin/'
     | '/_employee/tasks/$assignmentId'
     | '/admin/applications/$appId'
@@ -674,6 +686,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/uploads': {
+      id: '/admin/uploads'
+      path: '/uploads'
+      fullPath: '/admin/uploads'
+      preLoaderRoute: typeof AdminUploadsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/transactions': {
@@ -1018,6 +1037,7 @@ interface AdminRouteChildren {
   AdminTeamLeaderSettingsRoute: typeof AdminTeamLeaderSettingsRoute
   AdminTenantsRoute: typeof AdminTenantsRoute
   AdminTransactionsRoute: typeof AdminTransactionsRoute
+  AdminUploadsRoute: typeof AdminUploadsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminApplicationsAppIdRoute: typeof AdminApplicationsAppIdRoute
   AdminAssignmentsAssignmentIdRoute: typeof AdminAssignmentsAssignmentIdRoute
@@ -1046,6 +1066,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminTeamLeaderSettingsRoute: AdminTeamLeaderSettingsRoute,
   AdminTenantsRoute: AdminTenantsRoute,
   AdminTransactionsRoute: AdminTransactionsRoute,
+  AdminUploadsRoute: AdminUploadsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminApplicationsAppIdRoute: AdminApplicationsAppIdRoute,
   AdminAssignmentsAssignmentIdRoute: AdminAssignmentsAssignmentIdRoute,
