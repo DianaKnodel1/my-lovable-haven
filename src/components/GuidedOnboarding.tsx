@@ -88,6 +88,7 @@ function TourView({ onClose }: TourViewProps) {
   useEffect(() => {
     if (step.route && location.pathname !== step.route) {
       setRouteReady(false);
+      setRect(null);
       navigate(step.route);
       return;
     }
@@ -132,7 +133,6 @@ function TourView({ onClose }: TourViewProps) {
   }, []);
 
   const next = () => {
-    if (!routeReady) return;
     if (stepIdx < TOTAL - 1) setStepIdx(stepIdx + 1);
     else onClose();
   };
