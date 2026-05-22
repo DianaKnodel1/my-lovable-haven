@@ -84,11 +84,14 @@ function ModeSelector({
   mode,
   onSelect,
   locked,
+  aiDisabled,
 }: {
   mode: "ai" | "human";
   onSelect: (m: "ai" | "human") => void;
   locked: boolean;
+  aiDisabled?: boolean;
 }) {
+  if (aiDisabled) return null;
   return (
     <div className="flex gap-1 bg-muted/60 rounded-xl p-1 mx-4 mt-3 shrink-0">
       <button
