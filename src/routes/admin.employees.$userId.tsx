@@ -722,6 +722,42 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function EmploymentTypeRow({ userId, value, onChange }: { userId: string; value: string | null; onChange: (v: string) => void }) {
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
+
+  const save = async (val: string) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ employment_type: val as any } as any)
+      .eq("user_id", userId);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Fehler", description: error.message, variant: "destructive" });
+      return;
+    }
+    onChange(val);
+    toast({ title: "Beschäftigungsart aktualisiert" });
+  };
+
+  return (
+    <div className="flex justify-between items-center text-xs py-1 gap-3">
+      <span className="text-muted-foreground shrink-0">Beschäftigungsart</span>
+      <Select value={value ?? ""} onValueChange={save} disabled={saving}>
+        <SelectTrigger className="h-7 text-xs w-[140px]">
+          <SelectValue placeholder="Nicht gesetzt" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="minijob">Minijob</SelectItem>
+          <SelectItem value="teilzeit">Teilzeit</SelectItem>
+          <SelectItem value="vollzeit">Vollzeit</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 function TeamLeaderSelect({ currentLeaderId, userId, onUpdate }: { currentLeaderId: string | null; userId: string; onUpdate: (id: string | null) => void }) {
   const { toast } = useToast();
   const { profiles } = useAdminData();
