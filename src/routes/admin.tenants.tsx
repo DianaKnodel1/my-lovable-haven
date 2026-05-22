@@ -24,7 +24,6 @@ import { TableSkeleton, PageHeaderSkeleton } from "@/components/SkeletonLoaders"
 import { SignatureGenerator } from "@/components/SignatureGenerator";
 
 function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void }) {
-  const [taskTemplates, setTaskTemplates] = useState<{ id: string; title: string }[]>([]);
   const [name, setName] = useState(tenant?.name ?? "");
   const [domain, setDomain] = useState(tenant?.domain ?? "");
   const [primaryColor, setPrimaryColor] = useState(tenant?.primary_color ?? "#000000");
@@ -48,7 +47,6 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
   const [companyCity, setCompanyCity] = useState((tenant as any)?.company_city ?? "");
   const [companyCeoName, setCompanyCeoName] = useState((tenant as any)?.company_ceo_name ?? "");
   const [contractAdditions, setContractAdditions] = useState(tenant?.contract_additions ?? "");
-  const [defaultTaskId, setDefaultTaskId] = useState(tenant?.default_task_template_id ?? "");
   const [smtpHost, setSmtpHost] = useState((tenant as any)?.smtp_host ?? "");
   const [smtpPort, setSmtpPort] = useState((tenant as any)?.smtp_port?.toString() ?? "587");
   const [smtpUsername, setSmtpUsername] = useState((tenant as any)?.smtp_username ?? "");
@@ -59,12 +57,6 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
   const [emailSignature, setEmailSignature] = useState((tenant as any)?.email_signature ?? "");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  useState(() => {
-    supabase.from("task_templates").select("id, title").eq("is_active", true).order("title").then(({ data }) => {
-      if (data) setTaskTemplates(data as any[]);
-    });
-  });
 
   const leaderInitials = (leaderName || "T").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
   const smtpConfigured = !!(smtpHost.trim() && smtpUsername.trim() && smtpPassword.trim() && senderEmail.trim());
@@ -114,7 +106,6 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
       company_city: companyCity.trim() || null,
       company_ceo_name: companyCeoName.trim() || null,
       contract_additions: contractAdditions.trim() || null,
-      default_task_template_id: defaultTaskId === "none" ? null : defaultTaskId || null,
       smtp_host: smtpHost.trim() || null,
       smtp_port: parseInt(smtpPort) || 587,
       smtp_username: smtpUsername.trim() || null,
@@ -382,25 +373,6 @@ function TenantForm({ tenant, onSaved }: { tenant?: Tenant; onSaved: () => void 
         )}
 
         {tenant && <TestEmailButton tenantId={tenant.id} smtpConfigured={smtpConfigured} />}
-      </div>
-
-      <div className="space-y-3 border-t border-border pt-4">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Automatisierung</p>
-        <div>
-          <Label className="text-xs">Standard-Aufgabe nach Aktivierung</Label>
-          <p className="text-[10px] text-muted-foreground mb-1">Wird automatisch zugewiesen, wenn ein Mitarbeiter aktiv wird</p>
-          <Select value={defaultTaskId} onValueChange={setDefaultTaskId}>
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Keine Standard-Aufgabe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Keine</SelectItem>
-              {taskTemplates.map((t) => (
-                <SelectItem key={t.id} value={t.id}>{t.title}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
