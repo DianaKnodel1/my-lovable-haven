@@ -328,11 +328,11 @@ function AdminEmployeeDetailPage() {
               {(profile as any).previous_address && (
                 <InfoRow label="Vorherige Adresse" value={(profile as any).previous_address} />
               )}
-              <InfoRow label="Beschäftigungsart" value={
-                  (profile as any).employment_type === "minijob" ? "Minijob" :
-                  (profile as any).employment_type === "teilzeit" ? "Teilzeit" :
-                  (profile as any).employment_type === "vollzeit" ? "Vollzeit" : "—"
-                } />
+              <EmploymentTypeRow
+                userId={userId!}
+                value={(profile as any).employment_type ?? null}
+                onChange={(v) => setProfiles((prev) => prev.map((p) => (p.user_id === userId ? ({ ...p, employment_type: v } as any) : p)))}
+              />
                 <InfoRow label="Steuer-Nr." value={(profile as any).tax_number || "—"} />
                 <InfoRow label="SV-Nr." value={(profile as any).social_security_number || "—"} />
                 <InfoRow label="IBAN" value={(profile as any).iban || "—"} />
