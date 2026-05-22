@@ -217,7 +217,8 @@ function TaskWizardPage() {
       setAssignment(a);
 
       const [bookingRes, stepsRes, questionsRes, progressRes, feedbackRes] = await Promise.all([
-        supabase.from("bookings").select("id, status").eq("user_id", user!.id).eq("assignment_id", assignmentId!).neq("status", "storniert"),
+        // Auch Termine ohne explizite assignment_id-Bindung zählen (z.B. vom Admin manuell erstellt).
+        supabase.from("bookings").select("id, status, assignment_id").eq("user_id", user!.id).neq("status", "storniert"),
         supabase.from("task_steps").select("*").eq("task_template_id", a.task_template_id).order("step_number"),
         supabase.from("task_questions").select("*").eq("task_template_id", a.task_template_id).order("sort_order"),
         supabase.from("task_progress").select("*").eq("assignment_id", assignmentId!).maybeSingle(),
@@ -225,7 +226,10 @@ function TaskWizardPage() {
       ]);
       setStepFeedback((feedbackRes.data as any[]) ?? []);
 
-      setHasBooking((bookingRes.data ?? []).length > 0);
+      const allBookings = (bookingRes.data ?? []) as any[];
+      const matchesAssignment = allBookings.some((b) => b.assignment_id === assignmentId);
+      const generic = allBookings.some((b) => !b.assignment_id);
+      setHasBooking(matchesAssignment || generic);
       const loadedSteps = ((stepsRes.data ?? []) as any[]).map((s) => ({
         ...s,
         content_blocks: Array.isArray(s.content_blocks) ? s.content_blocks : [],
@@ -444,9 +448,8 @@ function TaskWizardPage() {
                 <p className="text-muted-foreground mt-2">{tpl.description}</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <InfoBox variant="info">
-                  <p className="font-medium">Vergütung</p>
-                  <p className="font-bold text-2xl mt-1 text-white drop-shadow-sm">{Number(tpl.compensation).toFixed(2).replace(".", ",")} €</p>
+                <InfoBox variant="hint" title="Vergütung">
+                  <p className="font-bold text-2xl">{Number(tpl.compensation).toFixed(2).replace(".", ",")} €</p>
                 </InfoBox>
                 <InfoBox variant="hint">
                   <p className="font-medium">So funktioniert's</p>
