@@ -30,6 +30,7 @@ export interface Tenant {
   company_signature_url: string | null;
   contract_additions: string | null;
   default_task_template_id: string | null;
+  ai_enabled: boolean;
 }
 
 interface TenantContextType {
