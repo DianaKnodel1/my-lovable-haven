@@ -111,8 +111,9 @@ function EmployeeSidebar({
   const isActive = hasFullAccess(employeeStatus);
   const items = buildNavItems({ kycPending, kycRejected, contractPending });
 
-  const brandName = tenant?.name || "Portal";
-  const brandInitial = brandName.charAt(0).toUpperCase();
+  const brandName = "Mitarbeiter-Portal";
+  const brandSubline = tenant?.name ?? "";
+  const brandInitial = "M";
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar" data-tour="sidebar">
@@ -128,7 +129,12 @@ function EmployeeSidebar({
                   <span className="text-xs font-bold text-primary-foreground">{brandInitial}</span>
                 </div>
               )}
-              <span className="text-lg font-heading font-bold text-sidebar-foreground tracking-tight">{brandName}</span>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="text-sm font-heading font-bold text-sidebar-foreground tracking-tight truncate">{brandName}</span>
+                {brandSubline && (
+                  <span className="text-[10px] text-sidebar-foreground/50 uppercase tracking-wider truncate">{brandSubline}</span>
+                )}
+              </div>
             </div>
           ) : (
             tenant?.logo_url ? (

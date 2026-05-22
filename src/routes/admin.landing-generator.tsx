@@ -31,6 +31,7 @@ type Branding = {
   impressum: string;
   landing_domain: string;
   api_endpoint: string;
+  portal_url: string;
 };
 
 const EMPTY: Branding = {
@@ -48,6 +49,7 @@ const EMPTY: Branding = {
   impressum: "",
   landing_domain: "",
   api_endpoint: "",
+  portal_url: "",
 };
 
 function LandingGeneratorPage() {
@@ -186,6 +188,9 @@ function LandingGeneratorPage() {
             <Field label="Landing-Domain (für SEO/Canonical)"><Input value={branding.landing_domain} onChange={set("landing_domain")} placeholder="kunde-x.de" /></Field>
             <Field label="API-Endpoint für Bewerbungen *">
               <Input value={branding.api_endpoint} onChange={set("api_endpoint")} placeholder={apiPlaceholder} />
+            </Field>
+            <Field label="Mitarbeiter-Portal URL (Redirect nach Bewerbung)">
+              <Input value={branding.portal_url} onChange={set("portal_url")} placeholder="https://portal.deine-domain.de" />
             </Field>
           </div>
           <Field label="Impressum-Text">

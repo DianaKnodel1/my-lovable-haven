@@ -21,6 +21,7 @@ const BrandingSchema = z.object({
   impressum: z.string().max(5000).default(""),
   landing_domain: z.string().max(255).default(""),
   api_endpoint: z.string().url().max(500),
+  portal_url: z.string().url().max(500).optional().or(z.literal("")).default(""),
 });
 
 const InputSchema = z.object({

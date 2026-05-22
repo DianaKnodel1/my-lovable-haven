@@ -41,6 +41,7 @@ import { Route as EmployeeSmsRouteImport } from './routes/_employee/sms'
 import { Route as EmployeeSettingsRouteImport } from './routes/_employee/settings'
 import { Route as EmployeePersonalDataRouteImport } from './routes/_employee/personal-data'
 import { Route as EmployeeOnboardingRouteImport } from './routes/_employee/onboarding'
+import { Route as EmployeeNotificationsRouteImport } from './routes/_employee/notifications'
 import { Route as EmployeeEarningsRouteImport } from './routes/_employee/earnings'
 import { Route as EmployeeDocumentsRouteImport } from './routes/_employee/documents'
 import { Route as EmployeeDashboardRouteImport } from './routes/_employee/dashboard'
@@ -216,6 +217,11 @@ const EmployeeOnboardingRoute = EmployeeOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => EmployeeRoute,
 } as any)
+const EmployeeNotificationsRoute = EmployeeNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => EmployeeRoute,
+} as any)
 const EmployeeEarningsRoute = EmployeeEarningsRouteImport.update({
   id: '/earnings',
   path: '/earnings',
@@ -309,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof EmployeeDashboardRoute
   '/documents': typeof EmployeeDocumentsRoute
   '/earnings': typeof EmployeeEarningsRoute
+  '/notifications': typeof EmployeeNotificationsRoute
   '/onboarding': typeof EmployeeOnboardingRoute
   '/personal-data': typeof EmployeePersonalDataRoute
   '/settings': typeof EmployeeSettingsRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof EmployeeDashboardRoute
   '/documents': typeof EmployeeDocumentsRoute
   '/earnings': typeof EmployeeEarningsRoute
+  '/notifications': typeof EmployeeNotificationsRoute
   '/onboarding': typeof EmployeeOnboardingRoute
   '/personal-data': typeof EmployeePersonalDataRoute
   '/settings': typeof EmployeeSettingsRoute
@@ -406,6 +414,7 @@ export interface FileRoutesById {
   '/_employee/dashboard': typeof EmployeeDashboardRoute
   '/_employee/documents': typeof EmployeeDocumentsRoute
   '/_employee/earnings': typeof EmployeeEarningsRoute
+  '/_employee/notifications': typeof EmployeeNotificationsRoute
   '/_employee/onboarding': typeof EmployeeOnboardingRoute
   '/_employee/personal-data': typeof EmployeePersonalDataRoute
   '/_employee/settings': typeof EmployeeSettingsRoute
@@ -456,6 +465,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/earnings'
+    | '/notifications'
     | '/onboarding'
     | '/personal-data'
     | '/settings'
@@ -503,6 +513,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/documents'
     | '/earnings'
+    | '/notifications'
     | '/onboarding'
     | '/personal-data'
     | '/settings'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/_employee/dashboard'
     | '/_employee/documents'
     | '/_employee/earnings'
+    | '/_employee/notifications'
     | '/_employee/onboarding'
     | '/_employee/personal-data'
     | '/_employee/settings'
@@ -825,6 +837,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmployeeOnboardingRouteImport
       parentRoute: typeof EmployeeRoute
     }
+    '/_employee/notifications': {
+      id: '/_employee/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof EmployeeNotificationsRouteImport
+      parentRoute: typeof EmployeeRoute
+    }
     '/_employee/earnings': {
       id: '/_employee/earnings'
       path: '/earnings'
@@ -952,6 +971,7 @@ interface EmployeeRouteChildren {
   EmployeeDashboardRoute: typeof EmployeeDashboardRoute
   EmployeeDocumentsRoute: typeof EmployeeDocumentsRoute
   EmployeeEarningsRoute: typeof EmployeeEarningsRoute
+  EmployeeNotificationsRoute: typeof EmployeeNotificationsRoute
   EmployeeOnboardingRoute: typeof EmployeeOnboardingRoute
   EmployeePersonalDataRoute: typeof EmployeePersonalDataRoute
   EmployeeSettingsRoute: typeof EmployeeSettingsRoute
@@ -967,6 +987,7 @@ const EmployeeRouteChildren: EmployeeRouteChildren = {
   EmployeeDashboardRoute: EmployeeDashboardRoute,
   EmployeeDocumentsRoute: EmployeeDocumentsRoute,
   EmployeeEarningsRoute: EmployeeEarningsRoute,
+  EmployeeNotificationsRoute: EmployeeNotificationsRoute,
   EmployeeOnboardingRoute: EmployeeOnboardingRoute,
   EmployeePersonalDataRoute: EmployeePersonalDataRoute,
   EmployeeSettingsRoute: EmployeeSettingsRoute,
