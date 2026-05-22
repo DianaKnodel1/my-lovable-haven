@@ -576,15 +576,35 @@ function TaskWizardPage() {
             <div className="space-y-6 animate-fade-in">
               <div>
                 <h2 className="text-xl font-heading font-bold text-foreground">Durchführung</h2>
-                <p className="text-muted-foreground mt-1">Führe die Aufgabe durch.</p>
+                <p className="text-muted-foreground mt-1">Folge der Anleitung Schritt für Schritt. Notiere offene Fragen direkt im Chat mit deinem Teamleiter.</p>
               </div>
               {(assignment.status === "zugewiesen" || assignment.status === "geplant") && hasBooking && (
                 <Button onClick={startTask} className="w-full h-11 gap-2">
                   <PlayCircle className="h-4 w-4" /> Aufgabe jetzt starten
                 </Button>
               )}
-              {(assignment.status === "in_bearbeitung" || isRejected) && (
-                <InfoBox variant="success"><p className="font-medium">Aufgabe gestartet – weiter zum Fragebogen.</p></InfoBox>
+              {(assignment.status === "in_bearbeitung" || isRejected || needsRevision) && (
+                <>
+                  <InfoBox variant="success">
+                    <p className="font-medium">Aufgabe ist gestartet</p>
+                    <p className="text-muted-foreground mt-1">Arbeite die nachfolgenden Punkte ab. Sobald du fertig bist, gehe auf „Weiter" und reiche deine Ergebnisse ein.</p>
+                  </InfoBox>
+                  {(assignment.individual_instructions || tpl.instructions) && (
+                    <Card className="border-none shadow-md">
+                      <CardContent className="pt-5 pb-5">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Anleitung</p>
+                        <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{assignment.individual_instructions || tpl.instructions}</div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  <AssignmentIndividualDataView data={{
+                    individual_phone: assignment.individual_phone ?? null,
+                    individual_hint: assignment.individual_hint ?? null,
+                    post_ident_pdf_url: assignment.post_ident_pdf_url ?? null,
+                    post_ident_pdf_name: assignment.post_ident_pdf_name ?? null,
+                  }} />
+                  {assignmentId && <TaskSmsMessages assignmentId={assignmentId} />}
+                </>
               )}
             </div>
           )}
