@@ -30,6 +30,8 @@ interface Booking {
   status: string;
   assignment_id: string | null;
   created_at: string;
+  cancelled_by_role?: string | null;
+  cancelled_at?: string | null;
 }
 
 const STATUS_LABELS: Record<string, { label: string; class: string; dot: string }> = {
@@ -93,7 +95,7 @@ function AppointmentsPage() {
     try {
       const { data, error: err } = await supabase
         .from("bookings")
-        .select("id, user_id, booking_date, booking_time, status, assignment_id, created_at")
+        .select("id, user_id, booking_date, booking_time, status, assignment_id, created_at, cancelled_by_role, cancelled_at")
         .eq("user_id", user!.id)
         .not("booking_date", "is", null)
         .order("booking_date", { ascending: false });
@@ -493,6 +495,23 @@ function AppointmentsPage() {
                     </span>
                     <Badge variant="secondary" className={cn("text-[9px]", STATUS_LABELS[b.status]?.class)}>
                       {STATUS_LABELS[b.status]?.label}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Stornierte Termine */}
+            {bookings.filter((b) => b.status === "storniert").length > 0 && (
+              <div className="pt-3 border-t border-border space-y-1.5">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Storniert</p>
+                {bookings.filter((b) => b.status === "storniert").slice(0, 5).map((b) => (
+                  <div key={b.id} className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-md bg-destructive/5 border border-destructive/15">
+                    <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                      {new Date(b.booking_date + "T00:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" })} {b.booking_time.slice(0, 5)}
+                    </span>
+                    <Badge variant="secondary" className="text-[9px] bg-destructive/10 text-destructive border-destructive/20">
+                      {b.cancelled_by_role === "admin" ? "Vom Admin storniert" : b.cancelled_by_role === "employee" ? "Von dir storniert" : "Storniert"}
                     </Badge>
                   </div>
                 ))}

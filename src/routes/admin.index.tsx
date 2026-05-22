@@ -108,7 +108,7 @@ function AdminDashboardPage() {
   const actionCards = [
     { label: "Neue Bewerbungen", value: newApplications, icon: FileText, path: "/admin/applications", highlight: newApplications > 0 },
     { label: "Offene Verifizierung", value: pendingKyc, icon: ShieldCheck, path: "/admin/kyc", highlight: pendingKyc > 0 },
-    { label: "Aufgaben zur Prüfung", value: pendingReviews, icon: ClipboardList, path: "/admin/tasks", highlight: pendingReviews > 0 },
+    { label: "Aufgaben zur Prüfung", value: pendingReviews, icon: ClipboardList, path: "/admin/reviews", highlight: pendingReviews > 0 },
     { label: "Termine heute", value: todayBookings, icon: CalendarDays, path: "/admin/appointments", highlight: todayBookings > 0 },
     { label: "Mitarbeiter angenommen", value: activeEmployees, icon: FileText, path: "/admin/employees", highlight: false },
     { label: "Mitarbeiter gesamt", value: profiles.length, icon: FileText, path: "/admin/employees", highlight: false },

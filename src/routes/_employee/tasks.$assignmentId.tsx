@@ -446,7 +446,7 @@ function TaskWizardPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <InfoBox variant="info">
                   <p className="font-medium">Vergütung</p>
-                  <p className="text-accent font-bold text-lg mt-1">{Number(tpl.compensation).toFixed(2)} €</p>
+                  <p className="font-bold text-2xl mt-1 text-white drop-shadow-sm">{Number(tpl.compensation).toFixed(2).replace(".", ",")} €</p>
                 </InfoBox>
                 <InfoBox variant="hint">
                   <p className="font-medium">So funktioniert's</p>
@@ -576,15 +576,35 @@ function TaskWizardPage() {
             <div className="space-y-6 animate-fade-in">
               <div>
                 <h2 className="text-xl font-heading font-bold text-foreground">Durchführung</h2>
-                <p className="text-muted-foreground mt-1">Führe die Aufgabe durch.</p>
+                <p className="text-muted-foreground mt-1">Folge der Anleitung Schritt für Schritt. Notiere offene Fragen direkt im Chat mit deinem Teamleiter.</p>
               </div>
               {(assignment.status === "zugewiesen" || assignment.status === "geplant") && hasBooking && (
                 <Button onClick={startTask} className="w-full h-11 gap-2">
                   <PlayCircle className="h-4 w-4" /> Aufgabe jetzt starten
                 </Button>
               )}
-              {(assignment.status === "in_bearbeitung" || isRejected) && (
-                <InfoBox variant="success"><p className="font-medium">Aufgabe gestartet – weiter zum Fragebogen.</p></InfoBox>
+              {(assignment.status === "in_bearbeitung" || isRejected || needsRevision) && (
+                <>
+                  <InfoBox variant="success">
+                    <p className="font-medium">Aufgabe ist gestartet</p>
+                    <p className="text-muted-foreground mt-1">Arbeite die nachfolgenden Punkte ab. Sobald du fertig bist, gehe auf „Weiter" und reiche deine Ergebnisse ein.</p>
+                  </InfoBox>
+                  {(assignment.individual_instructions || tpl.instructions) && (
+                    <Card className="border-none shadow-md">
+                      <CardContent className="pt-5 pb-5">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Anleitung</p>
+                        <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{assignment.individual_instructions || tpl.instructions}</div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  <AssignmentIndividualDataView data={{
+                    individual_phone: assignment.individual_phone ?? null,
+                    individual_hint: assignment.individual_hint ?? null,
+                    post_ident_pdf_url: assignment.post_ident_pdf_url ?? null,
+                    post_ident_pdf_name: assignment.post_ident_pdf_name ?? null,
+                  }} />
+                  {assignmentId && <TaskSmsMessages assignmentId={assignmentId} />}
+                </>
               )}
             </div>
           )}
@@ -657,7 +677,7 @@ function TaskWizardPage() {
               </div>
               <h2 className="text-2xl font-heading font-bold text-foreground">Auftrag eingereicht! 🎉</h2>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Dein Auftrag wird jetzt geprüft. Die Vergütung von <strong className="text-accent">{Number(tpl.compensation).toFixed(2)} €</strong> wird
+                Dein Auftrag wird jetzt geprüft. Die Vergütung von <strong className="text-foreground">{Number(tpl.compensation).toFixed(2).replace(".", ",")} €</strong> wird
                 nach Genehmigung gutgeschrieben.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
@@ -747,7 +767,7 @@ function TaskWizardPage() {
             </div>
             <div className="flex flex-col items-center text-center">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Vergütung</p>
-              <div className="h-12 w-12 rounded-full bg-accent/10 border-2 border-accent flex items-center justify-center text-[10px] font-bold text-accent leading-tight">
+              <div className="h-12 w-12 rounded-full bg-emerald-500 border-2 border-emerald-600 flex items-center justify-center text-[11px] font-bold text-white leading-tight shadow-sm">
                 €{Number(tpl.compensation).toFixed(0)}
               </div>
             </div>
