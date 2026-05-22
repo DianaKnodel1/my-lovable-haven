@@ -100,8 +100,6 @@ function AdminEmployeesPage() {
     setProfiles((prev) => prev.map((p) => (p.user_id === userId ? { ...p, status: newStatus } : p)));
   };
 
-  if (loading) return <div className="p-6 lg:p-8 space-y-5"><PageHeaderSkeleton /><TableSkeleton rows={5} cols={7} /></div>;
-
   // Onboarding-Map pro User
   const kycByUser = new Map(kycList.map((k: any) => [k.user_id, k]));
   const bookingByUser = new Set(allBookings.map((b: any) => b.user_id));
@@ -118,7 +116,7 @@ function AdminEmployeesPage() {
   ];
 
   const filtered = profiles.filter((p) => {
-    if (!p.full_name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (!(p.full_name ?? "").toLowerCase().includes(search.toLowerCase())) return false;
     if (filterStatus && filterStatus !== "all") {
       // Stuck-Filter
       if (filterStatus.startsWith("stuck:")) {
@@ -136,6 +134,8 @@ function AdminEmployeesPage() {
   const { paged, page, setPage, pageCount, rangeFrom, rangeTo, total } = usePagination(filtered, 25);
 
 
+
+  if (loading) return <div className="p-6 lg:p-8 space-y-5"><PageHeaderSkeleton /><TableSkeleton rows={5} cols={7} /></div>;
 
   return (
     <div className="p-6 lg:p-8 space-y-5">
