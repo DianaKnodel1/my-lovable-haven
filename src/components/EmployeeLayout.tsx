@@ -149,7 +149,7 @@ function EmployeeSidebar({
                 const locked = item.requiresActive && !isActive;
                 return (
                   <SidebarMenuItem key={item.title} data-tour={`nav-${item.url.replace("/", "")}`}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild className="h-auto py-0">
                       <NavLink
                         to={locked ? "#" : item.url}
                         end
