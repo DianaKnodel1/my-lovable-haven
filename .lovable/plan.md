@@ -1,120 +1,72 @@
-# Landing-Page-Generator – Umsetzungsplan
+# Plan
 
-## Ziel
-Jeder Tenant (Domain) bekommt eine eigene öffentliche Landing Page. Admin/Teamleiter wählt 1 von 5 Themes und kann Texte (Hero, CTA, Features) anpassen. Themes sind so gebaut, dass sie durch Farben/Fonts/Bilder weiter unkenntlich gemacht werden können.
+## 1. Standard-Aufträge als geordnete Liste
 
----
+**Datenbank (Migration):**
+- Neue Tabelle `tenant_default_tasks (id, tenant_id, task_template_id, sort_order)` mit Unique (tenant_id, sort_order).
+- RLS: Admins manage, Authenticated read.
+- Alte Spalte `tenants.default_task_template_id` bleibt vorerst stehen (Migration-Sicherheit), wird aber nicht mehr genutzt — Default beim Anlegen automatisch in neue Tabelle migriert.
 
-## Phase 1 – Theme-Labor (separates Projekt)
+**Logik:**
+- Beim Buchen wird gezählt, wie viele bestätigte Buchungen der Mitarbeiter bereits hat (n). Wenn `n < default_count`, wird automatisch der `n+1`-te Standard-Auftrag zugewiesen. Ab der `(n+1)`-ten Buchung läuft individuelle Zuweisung (admin).
+- Update der bestehenden Booking-Logik (Auto-Assignment-Trigger oder Server-Fn — Stelle finde ich in `src/lib/` / Booking-Handler).
 
-**Du legst ein neues Lovable-Projekt an** namens `landing-themes-lab`. Dort iterieren wir nur am Look – ohne Backend, ohne Auth, ohne Risiko für die Haupt-App.
+**UI:**
+- Domain-Dialog: Block „Standard-Auftrag nach Aktivierung" **entfernen**.
+- Neuer Tab/Karte in Admin-Einstellungen: Auflistung pro Domain, Drag-and-Drop-Reihenfolge, „Auftrag hinzufügen"-Selector. Klare Anzeige „Buchung #1 → Auftrag X, Buchung #2 → Auftrag Y, …".
 
-Was wir dort bauen:
-- 5 Routen: `/theme/editorial`, `/theme/brutalist`, `/theme/organic`, `/theme/corporate`, `/theme/dark-tech`
-- Jede Route = eine komplette Landing Page mit Dummy-Daten (Hero, 3 Features, Stats, CTA, Footer)
-- Alle Themes konsumieren **das gleiche Props-Interface** (`hero_title`, `hero_subtitle`, `cta_label`, `features[]`, `logo_url`, `primary_color`)
-- Du sagst pro Theme: passt / Variante X bitte / weg damit
+## 2. Admin-Einstellungen als zentrale Hub-Seite
 
-Wenn alle 5 Themes deine Freigabe haben → Phase 2.
+Neue Struktur `/admin/settings` mit Tabs (oder Karten-Grid → Detail-Seiten):
 
-## Phase 2 – Übernahme in die Haupt-App
+| Tab | Inhalt | Quelle |
+|---|---|---|
+| Allgemein | Passwort, Erscheinungsbild | bestehend |
+| Domains | Tenant-Verwaltung | aus `/admin/tenants` |
+| Standard-Aufträge | Neue UI (siehe oben) | neu |
+| Teamleiter | Profil, Avatar, Online-Status | aus `/admin/team-leader-settings` |
+| KI-Assistent | An/Aus, System-Prompt, FAQ, Modell | aus `/admin/ai-settings` |
+| E-Mail-Vorlagen | Welcome / Reset / Signatur | aus `/admin/email-templates` |
+| Buchungslimits | min Pause, Tageslimit | bestehend BookingLimitsCard |
 
-Cross-Project-Copy der finalen Theme-Komponenten aus dem Lab nach:
-```
-src/components/landing/themes/
-  EditorialTheme.tsx
-  BrutalistTheme.tsx
-  OrganicTheme.tsx
-  CorporateTheme.tsx
-  DarkTechTheme.tsx
-  index.ts        // registry: { editorial: EditorialTheme, ... }
-  types.ts        // LandingProps interface
-```
+Sidebar-Einträge `Domains`, `Teamleiter`, `KI-Einstellungen`, `E-Mail-Vorlagen` werden **aus der Sidebar entfernt** (Routes bleiben für Direkt-Links bestehen, leiten aber auf `/admin/settings?tab=…` weiter).
 
-## Phase 3 – Datenmodell
+**Admin-Sidebar danach (operativ):** Übersicht, Bewerbungen, Mitarbeiter, Aufträge, Termine, Verträge, Chat, SMS, E-Mail-Logs, Aktivität, Post-Ident, KYC, Reviews, Revisionen, Transaktionen, **Einstellungen** (unten).
 
-Migration: Spalten an `tenants` ergänzen
-- `theme_key` text default `'corporate'` (welches Theme)
-- `cta_label` text default `'Jetzt bewerben'`
-- `features` jsonb default `'[]'` (Array aus `{title, description, icon?}`)
-- bestehende Felder (`hero_title`, `hero_subtitle`, `logo_url`, `primary_color`) bleiben
+## 3. Sidebar-Redesign (Admin + Mitarbeiter)
 
-Keine RLS-Änderung nötig – `tenants_public` View liefert das schon.
+Style angelehnt an Screenshot 3, aber **theme-abhängig**:
+- Light Mode: weißer Hintergrund, dezente Borders.
+- Dark Mode: dunkler Hintergrund (`bg-slate-900`/`#0f172a`).
+- Logo/Branding-Avatar oben links mit Firmenname.
+- Aktive Route: **blauer Active-State** (`bg-blue-600` Hintergrund, weißer Text, `rounded-lg`, leichter Glow). Hover: subtiler `bg-muted/50`.
+- Konsistente Icons (Lucide), gleicher Abstand, klare Trennung Gruppen.
+- Collapse-Button unten („Einklappen").
+- Mitarbeiter-Sidebar: identisches System, gleiche Tokens.
 
-## Phase 4 – Public Landing Route
+## 4. Mitarbeiter-Dashboard
 
-Neue Route `src/routes/l.$domain.tsx`:
-- Loader lädt Tenant via `get_public_tenant_by_domain(_domain)`
-- Wählt Theme-Komponente aus Registry per `theme_key`
-- Rendert mit Tenant-Props
-- Eigenes `head()` mit Tenant-spezifischem Title/OG
+- Chat-Block (Teamleiter-Nachrichten + Eingabefeld) komplett aus `/dashboard` entfernen. Chat ist über `Mitteilungen` und Floating-Chat-Button weiterhin erreichbar.
 
-URL-Schema: `/l/<domain>` (z.B. `/l/acme`). Später optional auf Custom-Domain mappen.
+## 5. Aufräumen
 
-## Phase 5 – Admin-Editor
-
-In `admin.tenants.tsx` pro Tenant ergänzen:
-- Theme-Picker (5 Karten mit Screenshot-Preview)
-- Textfelder: Hero-Titel, Subtitle, CTA-Label
-- Feature-Liste (Add/Remove, je 3–6 Einträge)
-- Live-Preview-Button öffnet `/l/<domain>` neuen Tab
-
-## Phase 6 (optional, später)
-- Farben/Fonts pro Tenant editierbar (CSS-Variablen)
-- Hero-Bild Upload (neuer Bucket `tenant-hero-images`)
-- Sections an/aus toggeln
-
----
+- Aus `admin.settings.tsx` die jetzt redundanten „Shortcut-Karten" (Standard-Auftrag → Domains, KI → AI-Settings) entfernen, da nun integriert.
+- Doppelte Funktionen vermeiden: Domain-Dialog enthält keinen Standard-Auftrag mehr.
 
 ## Technische Details
 
-**Theme-Props-Interface (fix):**
-```ts
-type LandingProps = {
-  hero_title: string;
-  hero_subtitle: string;
-  cta_label: string;
-  cta_href: string;        // → /register?tenant=<domain>
-  logo_url?: string | null;
-  primary_color?: string | null;
-  features: { title: string; description: string }[];
-}
-```
+- Migration: `tenant_default_tasks` + RLS + Backfill aus `tenants.default_task_template_id`.
+- Booking-Auto-Assign: bestehende Stelle suchen (`task_assignments` Insert nach Booking) und auf neue Tabelle umstellen — Index `n = count(task_assignments where user_id=…)`.
+- Sidebar-Komponenten: `AdminLayout.tsx` + `EmployeeLayout.tsx` refactor; Tokens in `src/styles.css` ergänzen (`--sidebar-active`, `--sidebar-active-foreground`).
+- Drag-and-Drop: `@dnd-kit/sortable` (bereits installiert? sonst hinzufügen).
+- Tabs: bestehende shadcn `Tabs`-Komponente.
 
-**Theme-Registry:**
-```ts
-export const THEMES = {
-  editorial: { component: EditorialTheme, label: 'Editorial', preview: '/themes/editorial.jpg' },
-  brutalist: { component: BrutalistTheme, label: 'Brutalist', preview: '/themes/brutalist.jpg' },
-  // ...
-} as const;
-```
+## Reihenfolge der Umsetzung
 
-**Cross-Project-Copy:** Sobald ein Theme im Lab freigegeben ist, holen wir die Datei mit `cross_project--copy_project_asset` rüber – keine manuelle Copy-Paste-Arbeit für dich.
-
----
-
-## Nächster konkreter Schritt für dich
-
-1. **Neues Projekt anlegen** mit dem Namen `landing-themes-lab` (im selben Workspace, sonst kann ich nicht drauf zugreifen).
-2. **In dem neuen Projekt** schreibst du genau diesen Prompt:
-
-> Baue ein reines Theme-Labor für Landing Pages. Erstelle 5 Routen unter `/theme/<key>` mit den Keys: `editorial`, `brutalist`, `organic`, `corporate`, `dark-tech`. Jede Route ist eine komplette Landing Page (Header mit Logo, Hero mit Titel+Subtitle+CTA-Button, 3 Feature-Cards, Stats-Sektion, Footer) und verwendet diese Dummy-Daten:
-> - hero_title: "Werde Teil unseres Teams"
-> - hero_subtitle: "Flexible Arbeitszeiten, faire Bezahlung, echtes Team."
-> - cta_label: "Jetzt bewerben"
-> - features: [{title:"Flexibel", description:"…"}, {title:"Fair", description:"…"}, {title:"Familiär", description:"…"}]
-> - logo_url: ein Platzhalter
->
-> Stil pro Theme:
-> 1. **editorial**: Serif-Display-Font, viel Whitespace, Magazin-Layout, schwarz/weiß + 1 Akzent
-> 2. **brutalist**: harte Kanten, Mono-Font, knallige Akzentfarbe, sichtbare Borders
-> 3. **organic**: warme Pastelle, runde Shapes, Blob-Animationen, sanfte Schatten
-> 4. **corporate**: Navy/Weiß, klare Cards, Stats-Sektion prominent, vertrauenserweckend
-> 5. **dark-tech**: dunkler Hintergrund, Gradient-Akzente, Glow-Buttons, futuristisch
->
-> Keine Auth, kein Backend, keine Datenbank. Nur Routen + Komponenten.
-
-3. Sobald die 5 Themes stehen, kommst du zurück und sagst mir welche passen. Ich kopiere sie dann hier rein und baue Editor + öffentliche Route.
-
-Sag Bescheid wenn das Lab-Projekt steht – oder ob du am Plan vorher noch was ändern willst (z.B. anderes Theme statt eins der fünf).
+1. Migration `tenant_default_tasks` (eigene Anfrage zur Bestätigung).
+2. Backend-Logik (Auto-Assign) aktualisieren.
+3. Admin-Einstellungen-Hub mit Tabs bauen, alte Routen umleiten.
+4. Standard-Aufträge UI im Tab.
+5. Domain-Dialog säubern.
+6. Sidebar Admin + Mitarbeiter neu stylen.
+7. Chat-Block aus Mitarbeiter-Dashboard entfernen.

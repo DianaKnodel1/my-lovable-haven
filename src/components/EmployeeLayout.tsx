@@ -163,7 +163,7 @@ function EmployeeSidebar({
                             ? "text-sidebar-foreground/30 pointer-events-none cursor-not-allowed"
                             : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                         )}
-                        activeClassName={locked ? "" : "!bg-sidebar-accent !text-sidebar-foreground font-semibold"}
+                        activeClassName={locked ? "" : "!bg-blue-600 !text-white font-semibold shadow-[0_2px_8px_-2px_rgba(37,99,235,0.45)] hover:!bg-blue-600"}
                         onClick={(e: React.MouseEvent) => { if (locked) e.preventDefault(); }}
                       >
                         {locked ? (

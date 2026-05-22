@@ -13,16 +13,13 @@ import { type EmployeeStatus, type KycStatus, type OnboardingStatus } from "@/li
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import {
   FileText, GraduationCap, ClipboardList, CalendarDays,
   Wallet, ArrowRight, CheckCircle2, Clock,
-  Lock, Circle, Timer, PartyPopper, TrendingUp, MessageCircle, Send,
+  Lock, Circle, Timer, PartyPopper, TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNextStep } from "@/hooks/use-next-step";
-import { useTeamLeader } from "@/hooks/use-team-leader";
 import { useToast } from "@/hooks/use-toast";
 
 interface Transaction {
@@ -31,25 +28,6 @@ interface Transaction {
   status: "ausstehend" | "genehmigt" | "gutgeschrieben" | "ausgezahlt" | string;
   created_at: string;
   assignment_id: string | null;
-}
-
-interface DashboardChatMessage {
-  id: string;
-  sender_id: string;
-  message: string;
-  created_at: string;
-}
-
-function formatRelativeTime(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "gerade eben";
-  if (mins < 60) return `vor ${mins} Min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `vor ${hours} Std`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `vor ${days} Tag${days === 1 ? "" : "en"}`;
-  return new Date(dateStr).toLocaleDateString("de-DE", { day: "numeric", month: "short" });
 }
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -77,7 +55,6 @@ interface Profile {
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { leader, initials: leaderInitials } = useTeamLeader();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [kyc, setKyc] = useState<{ status: KycStatus } | null>(null);
   const [nextBookingDate, setNextBookingDate] = useState<string | null>(null);
@@ -88,9 +65,6 @@ function DashboardPage() {
   const [taskCount, setTaskCount] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
   const [recentTx, setRecentTx] = useState<Transaction[]>([]);
-  const [chatMessages, setChatMessages] = useState<DashboardChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [sendingChat, setSendingChat] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scheduledTask, setScheduledTask] = useState<{ releaseAt: string } | null>(null);
@@ -110,14 +84,13 @@ function DashboardPage() {
     if (authLoading || !user) return;
     const load = async () => {
       try {
-        const [profileRes, kycRes, bookingsRes, txRes, assignRes, completedRes, chatRes] = await Promise.all([
+        const [profileRes, kycRes, bookingsRes, txRes, assignRes, completedRes] = await Promise.all([
           supabase.from("profiles").select("full_name, status, contract_signed_at, onboarding_status, team_leader_id, created_at, address, birth_date, street, zip_code, city, employment_type").eq("user_id", user.id).maybeSingle(),
           supabase.from("kyc_verifications").select("status").eq("user_id", user.id).maybeSingle(),
           supabase.from("bookings").select("id, booking_date, booking_time, status").eq("user_id", user.id).neq("status", "storniert").not("booking_date", "is", null).order("booking_date", { ascending: true }),
           supabase.from("user_transactions").select("id, amount, status, created_at, assignment_id").eq("user_id", user.id).order("created_at", { ascending: false }),
           supabase.from("task_assignments").select("id").eq("user_id", user.id).in("status", ["zugewiesen", "in_bearbeitung"]),
           supabase.from("task_assignments").select("id").eq("user_id", user.id).in("status", ["genehmigt", "abgeschlossen"]),
-          supabase.from("chat_messages").select("id, sender_id, message, created_at").or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order("created_at", { ascending: false }).limit(4),
         ]);
         if (profileRes.error) throw profileRes.error;
         setProfile(profileRes.data as Profile | null);
@@ -142,7 +115,6 @@ function DashboardPage() {
         setRecentTx(txData.slice(0, 5));
         setTaskCount(assignRes.data?.length ?? 0);
         setCompletedTasks(completedRes.data?.length ?? 0);
-        setChatMessages(((chatRes.data ?? []) as DashboardChatMessage[]).reverse());
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -151,43 +123,6 @@ function DashboardPage() {
     };
     load();
   }, [user, authLoading]);
-
-  // Realtime: neue Chat-Nachrichten direkt im Dashboard-Widget
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(`dashboard-chat-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages", filter: `receiver_id=eq.${user.id}` },
-        (payload) => {
-          const m = payload.new as DashboardChatMessage;
-          setChatMessages((prev) => [...prev, m].slice(-4));
-        }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user]);
-
-  const handleSendChat = async () => {
-    const leaderId = profile?.team_leader_id;
-    if (!user || !chatInput.trim() || !leaderId) return;
-    setSendingChat(true);
-    const text = chatInput.trim();
-    setChatInput("");
-    const { data, error: sendErr } = await supabase
-      .from("chat_messages")
-      .insert({ sender_id: user.id, receiver_id: leaderId, message: text })
-      .select("id, sender_id, message, created_at")
-      .single();
-    if (sendErr) {
-      toast({ title: "Senden fehlgeschlagen", description: sendErr.message, variant: "destructive" });
-      setChatInput(text);
-    } else if (data) {
-      setChatMessages((prev) => [...prev, data as DashboardChatMessage].slice(-4));
-    }
-    setSendingChat(false);
-  };
 
   const handleCancelBooking = async (id: string) => {
     const { error: cancelErr } = await supabase.from("bookings").update({ status: "storniert" as any }).eq("id", id);
@@ -558,77 +493,6 @@ function DashboardPage() {
                   </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-
-          <Card className="animate-fade-in">
-            <CardContent className="py-5 px-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-9 w-9">
-                    {leader.avatar_url && <AvatarImage src={leader.avatar_url} alt={leader.name} />}
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">{leaderInitials}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-heading font-semibold text-foreground text-sm leading-tight">{leader.name}</p>
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                      <span className={cn("h-1.5 w-1.5 rounded-full", leader.is_online ? "bg-accent" : "bg-muted-foreground")} />
-                      {leader.is_online ? "Online" : "Offline"}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate("/chat")}>
-                  Vollchat <ArrowRight className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
-
-              <div className="space-y-2 mb-3 min-h-[80px]">
-                {chatMessages.length === 0 ? (
-                  <div className="text-center py-4 text-xs text-muted-foreground flex flex-col items-center gap-2">
-                    <MessageCircle className="h-6 w-6 text-muted-foreground/40" />
-                    Noch keine Nachrichten. Schreib gleich los!
-                  </div>
-                ) : (
-                  chatMessages.map((m) => {
-                    const isMine = m.sender_id === user?.id;
-                    return (
-                      <div key={m.id} className={cn("flex", isMine ? "justify-end" : "justify-start")}>
-                        <div className={cn(
-                          "max-w-[80%] px-3 py-2 rounded-2xl text-sm",
-                          isMine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted text-foreground rounded-bl-sm"
-                        )}>
-                          <p className="whitespace-pre-wrap break-words">{m.message}</p>
-                          <p className={cn("text-[10px] mt-0.5", isMine ? "text-primary-foreground/60" : "text-muted-foreground")}>
-                            {formatRelativeTime(m.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              <form
-                onSubmit={(e) => { e.preventDefault(); handleSendChat(); }}
-                className="flex items-center gap-2"
-              >
-                <Input
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Nachricht schreiben..."
-                  disabled={sendingChat || !profile?.team_leader_id}
-                  className="rounded-xl"
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!chatInput.trim() || sendingChat || !profile?.team_leader_id}
-                  className="rounded-xl shrink-0"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
             </CardContent>
           </Card>
         </>

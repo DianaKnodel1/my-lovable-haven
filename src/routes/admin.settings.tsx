@@ -13,8 +13,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { translateAuthError } from "@/lib/auth-errors";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Lock, Save, Palette, CalendarClock, Bot, ClipboardList, ArrowRight } from "lucide-react";
+import { Lock, Save, Palette, Bot, ArrowRight, Globe, Users as UsersIcon, Mail } from "lucide-react";
 import { BookingLimitsCard } from "@/components/admin/BookingLimitsCard";
+import { StandardTasksCard } from "@/components/admin/StandardTasksCard";
 import { Link } from "@tanstack/react-router";
 
 function AdminSettingsPage() {
@@ -48,8 +49,52 @@ function AdminSettingsPage() {
     <div className="p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-xl font-heading font-bold text-foreground">Admin-Einstellungen</h1>
-        <p className="text-sm text-muted-foreground mt-1">Passwort & Sicherheit</p>
+        <p className="text-sm text-muted-foreground mt-1">Zentrale Konfiguration: Domains, Standard-Aufträge, KI, Teamleiter, E-Mails, Sicherheit.</p>
       </div>
+
+      {/* Quick-Links zu größeren Setup-Bereichen */}
+      <div className="grid sm:grid-cols-2 gap-3">
+        <Link to="/admin/tenants" className="group">
+          <Card className="hover:border-primary/40 transition-colors h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2"><Globe className="h-4 w-4" /> Domains</CardTitle>
+              <CardDescription className="text-xs">Rebranding, Hero, Logo, SMTP, Unternehmensdaten</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0"><span className="text-xs text-primary inline-flex items-center gap-1">Öffnen <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" /></span></CardContent>
+          </Card>
+        </Link>
+        <Link to="/admin/team-leader-settings" className="group">
+          <Card className="hover:border-primary/40 transition-colors h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2"><UsersIcon className="h-4 w-4" /> Teamleiter</CardTitle>
+              <CardDescription className="text-xs">Profil, Avatar, Online-Status</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0"><span className="text-xs text-primary inline-flex items-center gap-1">Öffnen <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" /></span></CardContent>
+          </Card>
+        </Link>
+        <Link to="/admin/ai-settings" className="group">
+          <Card className="hover:border-primary/40 transition-colors h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2"><Bot className="h-4 w-4" /> KI-Assistent</CardTitle>
+              <CardDescription className="text-xs">An/Aus, FAQ, System-Prompt, Modell</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0"><span className="text-xs text-primary inline-flex items-center gap-1">Öffnen <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" /></span></CardContent>
+          </Card>
+        </Link>
+        <Link to="/admin/email-templates" className="group">
+          <Card className="hover:border-primary/40 transition-colors h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2"><Mail className="h-4 w-4" /> E-Mail-Vorlagen</CardTitle>
+              <CardDescription className="text-xs">Willkommen, Reset, Signatur</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0"><span className="text-xs text-primary inline-flex items-center gap-1">Öffnen <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" /></span></CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      <StandardTasksCard />
+
+      <BookingLimitsCard />
 
       <Card>
         <CardHeader className="pb-3">
@@ -60,42 +105,6 @@ function AdminSettingsPage() {
         </CardHeader>
         <CardContent>
           <ThemeToggle variant="outline" />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Bot className="h-4 w-4" /> KI-Chat für Mitarbeiter
-          </CardTitle>
-          <CardDescription>
-            Aktiviere oder deaktiviere den KI-Assistenten im Mitarbeiter-Portal. Wenn aus, sehen Mitarbeiter nur den persönlichen Kontakt zum Teamleiter.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link to="/admin/ai-settings">
-            <Button variant="outline" className="gap-2">
-              Zu den KI-Einstellungen <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <ClipboardList className="h-4 w-4" /> Standard-Auftrag
-          </CardTitle>
-          <CardDescription>
-            Der Standard-Auftrag wird neuen Mitarbeitern automatisch bei der ersten Terminbuchung zugewiesen. Du legst ihn pro Domain unter <strong>Domains</strong> fest (Feld „Standard-Auftrag").
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link to="/admin/tenants">
-            <Button variant="outline" className="gap-2">
-              Zu den Domains <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
         </CardContent>
       </Card>
 
@@ -124,8 +133,6 @@ function AdminSettingsPage() {
       <p className="text-xs text-muted-foreground">
         SMS API Keys werden im Bereich <strong>SMS</strong> verwaltet.
       </p>
-
-      <BookingLimitsCard />
     </div>
   );
 }
