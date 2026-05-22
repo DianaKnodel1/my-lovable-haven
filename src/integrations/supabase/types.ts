@@ -1666,6 +1666,7 @@ export type Database = {
     Views: {
       tenants_public: {
         Row: {
+          ai_enabled: boolean | null
           company_address: string | null
           company_ceo_name: string | null
           company_city: string | null
@@ -1687,6 +1688,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          ai_enabled?: boolean | null
           company_address?: string | null
           company_ceo_name?: string | null
           company_city?: string | null
@@ -1708,6 +1710,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          ai_enabled?: boolean | null
           company_address?: string | null
           company_ceo_name?: string | null
           company_city?: string | null
@@ -1750,6 +1753,7 @@ export type Database = {
       get_first_active_public_tenant: {
         Args: never
         Returns: {
+          ai_enabled: boolean | null
           company_address: string | null
           company_ceo_name: string | null
           company_city: string | null
@@ -1794,6 +1798,7 @@ export type Database = {
       get_public_tenant_by_domain: {
         Args: { _domain: string }
         Returns: {
+          ai_enabled: boolean | null
           company_address: string | null
           company_ceo_name: string | null
           company_city: string | null
