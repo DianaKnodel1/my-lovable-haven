@@ -37,7 +37,7 @@ interface DocumentRow {
 }
 
 type Row =
-  | { kind: "submission"; id: string; created_at: string; user_id: string; assignment_id: string; status: string; files: { path: string; name: string }[]; bucket: "task-submissions" }
+  | { kind: "submission"; id: string; created_at: string; user_id: string; assignment_id: string; status: string; files: { path: string; name: string }[]; bucket: "task-submissions"; notes: string | null }
   | { kind: "document"; id: string; created_at: string; user_id: string; category: string; status: string; files: { path: string; name: string }[]; bucket: "documents"; notes: string | null };
 
 function AdminUploadsPage() {
@@ -92,6 +92,7 @@ function AdminUploadsPage() {
           status: asg.status,
           bucket: "task-submissions",
           files: (sub.file_urls ?? []).map((p) => ({ path: p, name: p.split("/").pop() ?? "Datei" })),
+          notes: sub.notes ?? null,
         };
         return { row, profileName: profile?.full_name ?? "Unbekannt", taskTitle: tpl?.title ?? "—", assignmentId: asg.id };
       })
