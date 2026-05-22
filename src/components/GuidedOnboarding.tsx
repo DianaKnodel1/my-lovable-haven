@@ -79,6 +79,7 @@ function TourView({ onClose }: TourViewProps) {
   const [stepIdx, setStepIdx] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [tick, setTick] = useState(0);
+  const [routeReady, setRouteReady] = useState(true);
   const findTimeoutRef = useRef<number | null>(null);
 
   const step = STEPS[stepIdx];
@@ -86,13 +87,17 @@ function TourView({ onClose }: TourViewProps) {
   // Navigate to required route
   useEffect(() => {
     if (step.route && location.pathname !== step.route) {
+      setRouteReady(false);
       navigate(step.route);
+      return;
     }
-  }, [stepIdx]); // eslint-disable-line
+    setRouteReady(true);
+  }, [stepIdx, step.route, location.pathname, navigate]);
 
   // Find target element (poll up to 2s for DOM)
   useEffect(() => {
     if (findTimeoutRef.current) window.clearTimeout(findTimeoutRef.current);
+    if (!routeReady) return;
     if (!step.target) { setRect(null); return; }
 
     let attempts = 0;
@@ -113,7 +118,7 @@ function TourView({ onClose }: TourViewProps) {
     };
     find();
     return () => { if (findTimeoutRef.current) window.clearTimeout(findTimeoutRef.current); };
-  }, [stepIdx, location.pathname, tick]);
+  }, [stepIdx, location.pathname, tick, routeReady]);
 
   // Recompute on resize/scroll
   useEffect(() => {
@@ -127,6 +132,7 @@ function TourView({ onClose }: TourViewProps) {
   }, []);
 
   const next = () => {
+    if (!routeReady) return;
     if (stepIdx < TOTAL - 1) setStepIdx(stepIdx + 1);
     else onClose();
   };
