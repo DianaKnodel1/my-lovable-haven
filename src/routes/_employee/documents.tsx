@@ -64,7 +64,7 @@ function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [category, setCategory] = useState("sonstiges");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -211,26 +211,30 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;margin:0}
   };
 
   const handleUpload = async () => {
-    if (!file || !user) return;
+    if (files.length === 0 || !user) return;
     setUploading(true);
     try {
-      const compressed = await compressImage(file);
-      const path = `${user.id}/${Date.now()}_${compressed.name}`;
-      const { error: uploadErr } = await supabase.storage.from("documents").upload(path, compressed);
-      if (uploadErr) throw uploadErr;
+      let success = 0;
+      for (const f of files) {
+        const compressed = await compressImage(f);
+        const path = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${compressed.name}`;
+        const { error: uploadErr } = await supabase.storage.from("documents").upload(path, compressed);
+        if (uploadErr) throw uploadErr;
 
-      const { error: insertErr } = await supabase.from("documents").insert({
-        uploaded_by: user.id,
-        user_id: user.id,
-        category: category as any,
-        file_url: path,
-        file_name: file.name,
-        notes: notes.trim() || null,
-      } as any);
-      if (insertErr) throw insertErr;
+        const { error: insertErr } = await supabase.from("documents").insert({
+          uploaded_by: user.id,
+          user_id: user.id,
+          category: category as any,
+          file_url: path,
+          file_name: f.name,
+          notes: notes.trim() || null,
+        } as any);
+        if (insertErr) throw insertErr;
+        success++;
+      }
 
-      toast({ title: "Dokument hochgeladen" });
-      setFile(null);
+      toast({ title: success === 1 ? "Dokument hochgeladen" : `${success} Dokumente hochgeladen` });
+      setFiles([]);
       setNotes("");
       setShowUpload(false);
       loadAll();
@@ -301,7 +305,16 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;margin:0}
             </div>
             <div className="space-y-2">
               <Label>Datei</Label>
-              <Input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              <Input
+                type="file"
+                multiple
+                onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+              />
+              {files.length > 0 && (
+                <p className="text-[11px] text-muted-foreground">
+                  {files.length} {files.length === 1 ? "Datei" : "Dateien"} ausgewählt
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Notiz (optional)</Label>
@@ -312,9 +325,9 @@ pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:11pt;margin:0}
                 rows={3}
               />
             </div>
-            <Button onClick={handleUpload} disabled={!file || uploading} className="w-full gap-2">
+            <Button onClick={handleUpload} disabled={files.length === 0 || uploading} className="w-full gap-2">
               <Upload className="h-4 w-4" />
-              {uploading ? "Wird hochgeladen…" : "Dokument hochladen"}
+              {uploading ? "Wird hochgeladen…" : files.length > 1 ? `${files.length} Dokumente hochladen` : "Dokument hochladen"}
             </Button>
           </CardContent>
         </Card>

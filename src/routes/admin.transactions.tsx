@@ -34,19 +34,19 @@ function AdminTransactionsPage() {
     setAllTransactions((prev) => prev.map((t) => (t.id === txId ? { ...t, status: "ausgezahlt" } : t)));
   };
 
-  if (loading) return <div className="p-5 space-y-4"><PageHeaderSkeleton /><TableSkeleton rows={5} cols={6} /></div>;
-
   const filtered = allTransactions.filter((t) => {
     if (filterUser && filterUser !== "all" && t.user_id !== filterUser) return false;
     if (filterStatus && filterStatus !== "all" && t.status !== filterStatus) return false;
     if (search) {
       const profile = profiles.find((p) => p.user_id === t.user_id);
-      if (!profile?.full_name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (!(profile?.full_name ?? "").toLowerCase().includes(search.toLowerCase())) return false;
     }
     return true;
   });
   const totalPending = filtered.filter((t) => t.status === "genehmigt").reduce((s, t) => s + Number(t.amount), 0);
   const { paged, page, setPage, pageCount, rangeFrom, rangeTo, total } = usePagination(filtered, 25);
+
+  if (loading) return <div className="p-5 space-y-4"><PageHeaderSkeleton /><TableSkeleton rows={5} cols={6} /></div>;
 
   return (
     <div className="p-5 space-y-4">

@@ -179,14 +179,14 @@ function AdminApplicationsPage() {
     }
   };
 
-  if (loading) return <div className="p-6 lg:p-8 space-y-5"><PageHeaderSkeleton /><TableSkeleton rows={5} cols={5} /></div>;
-
   const filtered = applications.filter((a) =>
-    a.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    a.email.toLowerCase().includes(search.toLowerCase())
+    (a.full_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (a.email ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   const { paged, page, setPage, pageCount, rangeFrom, rangeTo, total } = usePagination(filtered, 25);
+
+  if (loading) return <div className="p-6 lg:p-8 space-y-5"><PageHeaderSkeleton /><TableSkeleton rows={5} cols={5} /></div>;
 
 
   const statusColor = (status: string) => {
