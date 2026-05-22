@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate as useTSNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_employee/tasks")({
   component: TasksPage,
@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_employee/tasks")({
 
 import { useEffect, useState } from "react";
 import { TableSkeleton } from "@/components/SkeletonLoaders";
-import { useNavigate } from "@/lib/router-compat";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +38,9 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 function TasksPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const tsNavigate = useTSNavigate();
+  const location = useLocation();
+  const isDetailRoute = location.pathname !== "/tasks";
 
   const [assignments, setAssignments] = useState<TaskAssignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,9 +144,15 @@ function TasksPage() {
     );
   }
 
+  if (isDetailRoute) return <Outlet />;
+
   const doneTasks = assignments.filter((a) => ["genehmigt", "abgeschlossen"].includes(a.status));
   const rejectedTasks = assignments.filter((a) => a.status === "abgelehnt");
   const activeTasks = assignments.filter((a) => !["genehmigt", "abgeschlossen", "abgelehnt"].includes(a.status));
+
+  const openAssignment = (assignmentId: string) => {
+    tsNavigate({ to: "/tasks/$assignmentId", params: { assignmentId } });
+  };
 
   const TaskRow = ({ a }: { a: TaskAssignment }) => {
     const st = STATUS_CONFIG[a.status] ?? { label: a.status, color: "text-muted-foreground", bg: "bg-muted", progress: 0 };
@@ -151,7 +160,7 @@ function TasksPage() {
     return (
       <tr
         className="border-b border-border hover:bg-muted/30 cursor-pointer transition-colors"
-        onClick={() => navigate(`/tasks/${a.id}`)}
+        onClick={() => openAssignment(a.id)}
       >
         <td className="py-4 px-4 w-20">
           {tpl.image_url ? (
@@ -173,7 +182,7 @@ function TasksPage() {
           {Number(tpl.compensation).toFixed(2).replace(".", ",")} €
         </td>
         <td className="py-4 px-4 text-right w-32">
-          <Button size="sm" className="h-8" onClick={(e) => { e.stopPropagation(); navigate(`/tasks/${a.id}`); }}>
+          <Button size="sm" className="h-8" onClick={(e) => { e.stopPropagation(); openAssignment(a.id); }}>
             Zum Auftrag
           </Button>
         </td>
