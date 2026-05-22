@@ -4,11 +4,10 @@ import {
   useNavigate as useTSNavigate,
   useLocation as useTSLocation,
   useParams as useTSParams,
-  useRouter,
   Outlet,
   Link as TSLink,
 } from "@tanstack/react-router";
-import { forwardRef, type ComponentProps, type ReactNode } from "react";
+import { forwardRef, useCallback, type ComponentProps, type ReactNode } from "react";
 
 export { Outlet };
 export { Link } from "@tanstack/react-router";
@@ -26,26 +25,17 @@ export function useLocation() {
 
 export function useNavigate() {
   const navigate = useTSNavigate();
-  const router = useRouter();
-  return (to: string | number, opts?: { replace?: boolean }) => {
+  return useCallback((to: string | number, opts?: { replace?: boolean }) => {
     if (typeof to === "number") {
       if (to < 0 && typeof window !== "undefined") window.history.go(to);
       return;
     }
-    // Use raw history push so literal interpolated paths like
-    // "/tasks/abc-123" match dynamic routes ("/tasks/$assignmentId")
-    // without needing to know the param name.
-    try {
-      if (opts?.replace) router.history.replace(to);
-      else router.history.push(to);
-    } catch {
-      const [pathPart, queryPart] = to.split("?");
-      const search = queryPart
-        ? Object.fromEntries(new URLSearchParams(queryPart).entries())
-        : undefined;
-      navigate({ to: pathPart, search: search as any, replace: opts?.replace });
-    }
-  };
+    const [pathPart, queryPart] = to.split("?");
+    const search = queryPart
+      ? Object.fromEntries(new URLSearchParams(queryPart).entries())
+      : undefined;
+    navigate({ to: pathPart, search: search as any, replace: opts?.replace });
+  }, [navigate]);
 }
 
 export function useSearchParams(): [
