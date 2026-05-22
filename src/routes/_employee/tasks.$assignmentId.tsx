@@ -590,7 +590,7 @@ function TaskWizardPage() {
                 <>
                   <InfoBox variant="success">
                     <p className="font-medium">Aufgabe ist gestartet</p>
-                    <p className="text-muted-foreground mt-1">Arbeite die nachfolgenden Punkte ab. Sobald du fertig bist, gehe auf „Weiter" und reiche deine Ergebnisse ein.</p>
+                    <p className="mt-1 opacity-90">Arbeite die nachfolgenden Punkte ab. Sobald du fertig bist, gehe auf „Weiter" und reiche deine Ergebnisse ein.</p>
                   </InfoBox>
                   {(assignment.individual_instructions || tpl.instructions) && (
                     <Card className="border-none shadow-md">
