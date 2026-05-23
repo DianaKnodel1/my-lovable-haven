@@ -53,24 +53,29 @@ function AdminUploadsPage() {
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const [subRes, docRes] = await Promise.all([
-        supabase
-          .from("task_submissions")
-          .select("id, assignment_id, notes, file_urls, submitted_at")
-          .order("submitted_at", { ascending: false })
-          .range(0, 4999),
-        supabase
-          .from("documents")
-          .select("id, user_id, category, file_url, file_name, status, notes, created_at")
-          .order("created_at", { ascending: false })
-          .range(0, 4999),
-      ]);
-      if (cancel) return;
-      if (subRes.error) toast({ title: "Fehler (Einreichungen)", description: subRes.error.message, variant: "destructive" });
-      if (docRes.error) toast({ title: "Fehler (Dokumente)", description: docRes.error.message, variant: "destructive" });
-      setSubmissions(((subRes.data ?? []) as SubmissionWithFiles[]).filter((s) => (s.file_urls ?? []).length > 0));
-      setDocuments(((docRes.data ?? []) as DocumentRow[]).filter((d) => !!d.file_url));
-      setLoading(false);
+      try {
+        const [subs, docs] = await Promise.all([
+          fetchAll<SubmissionWithFiles>(() =>
+            supabase
+              .from("task_submissions")
+              .select("id, assignment_id, notes, file_urls, submitted_at")
+              .order("submitted_at", { ascending: false }),
+          ),
+          fetchAll<DocumentRow>(() =>
+            supabase
+              .from("documents")
+              .select("id, user_id, category, file_url, file_name, status, notes, created_at")
+              .order("created_at", { ascending: false }),
+          ),
+        ]);
+        if (cancel) return;
+        setSubmissions(subs.filter((s) => (s.file_urls ?? []).length > 0));
+        setDocuments(docs.filter((d) => !!d.file_url));
+      } catch (e: any) {
+        if (!cancel) toast({ title: "Fehler beim Laden", description: e?.message ?? String(e), variant: "destructive" });
+      } finally {
+        if (!cancel) setLoading(false);
+      }
     })();
     return () => { cancel = true; };
   }, [toast]);
