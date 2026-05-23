@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { fetchAll } from "@/lib/fetch-all";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
@@ -73,17 +74,16 @@ function AdminPostPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("post_entries" as any)
-      .select("*")
-      .order("created_at", { ascending: false })
-      .range(0, 49_999);
-    if (error) {
-      toast({ title: "Fehler beim Laden", description: error.message, variant: "destructive" });
-    } else {
-      setEntries((data as any) ?? []);
+    try {
+      const data = await fetchAll<any>(() =>
+        supabase.from("post_entries" as any).select("*").order("created_at", { ascending: false }),
+      );
+      setEntries(data);
+    } catch (e: any) {
+      toast({ title: "Fehler beim Laden", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);

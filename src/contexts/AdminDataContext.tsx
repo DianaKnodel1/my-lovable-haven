@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { checkRiskFlag, type EmployeeStatus, type KycStatus, type OnboardingStatus } from "@/lib/status";
 export type { EmployeeStatus, KycStatus, OnboardingStatus };
 import { useToast } from "@/hooks/use-toast";
+import { fetchAll } from "@/lib/fetch-all";
 
 export interface Application {
   id: string; full_name: string; first_name: string | null; last_name: string | null;
@@ -80,24 +81,23 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
-    // Supabase hat ein Default-Limit von 1000 Zeilen pro Query – mit .range() heben wir das auf.
-    const ALL = 49_999;
-    const [appsRes, profilesRes, kycRes, templatesRes, assignRes, slotsRes, bookingsRes, txRes, convRes, rolesRes] = await Promise.all([
-      supabase.from("applications").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("kyc_verifications").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("task_templates").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("task_assignments").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("time_slots").select("*").order("slot_date", { ascending: false }).range(0, ALL),
-      supabase.from("bookings").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("user_transactions").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("chat_conversations").select("*").order("created_at", { ascending: false }).range(0, ALL),
-      supabase.from("user_roles").select("user_id, role").eq("role", "admin").range(0, ALL),
+    // KEINE Limits — fetchAll() paginiert in 1000er-Chunks, bis ALLES geladen ist.
+    const [apps, profilesData, kyc, templatesData, assignData, slotsData, bookingsData, txData, convData, rolesData] = await Promise.all([
+      fetchAll<Application>(() => supabase.from("applications").select("*").order("created_at", { ascending: false })),
+      fetchAll<ProfileRow>(() => supabase.from("profiles").select("*").order("created_at", { ascending: false })),
+      fetchAll<KycRow>(() => supabase.from("kyc_verifications").select("*").order("created_at", { ascending: false })),
+      fetchAll<TaskTemplate>(() => supabase.from("task_templates").select("*").order("created_at", { ascending: false })),
+      fetchAll<AssignmentRow>(() => supabase.from("task_assignments").select("*").order("created_at", { ascending: false })),
+      fetchAll<TimeSlotRow>(() => supabase.from("time_slots").select("*").order("slot_date", { ascending: false })),
+      fetchAll<BookingRow>(() => supabase.from("bookings").select("*").order("created_at", { ascending: false })),
+      fetchAll<TransactionRow>(() => supabase.from("user_transactions").select("*").order("created_at", { ascending: false })),
+      fetchAll<ChatConversationRow>(() => supabase.from("chat_conversations").select("*").order("created_at", { ascending: false })),
+      fetchAll<{ user_id: string; role: string }>(() => supabase.from("user_roles").select("user_id, role").eq("role", "admin")),
     ]);
-    setApplications((appsRes.data as Application[]) ?? []);
-    const profileData = (profilesRes.data as ProfileRow[]) ?? [];
+    setApplications(apps);
+    const profileData = profilesData;
     setProfiles(profileData);
-    setAdminUserIds(new Set((rolesRes.data ?? []).map((r: any) => r.user_id)));
+    setAdminUserIds(new Set(rolesData.map((r: any) => r.user_id)));
 
     // E-Mail-Bestätigungen (admin RPC)
     try {
@@ -105,7 +105,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       setEmailConfirmedUserIds(new Set((confs ?? []).filter((c: any) => c.email_confirmed).map((c: any) => c.user_id)));
     } catch { /* ignore */ }
 
-    const kycData = (kycRes.data as KycRow[]) ?? [];
+    const kycData = kyc;
     for (const kyc of kycData) {
       const profile = profileData.find((p) => p.user_id === kyc.user_id);
       const shouldFlag = profile ? checkRiskFlag(profile.living_since) : false;
@@ -115,12 +115,12 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       }
     }
     setKycList(kycData);
-    setTemplates((templatesRes.data as TaskTemplate[]) ?? []);
-    setAssignments((assignRes.data as unknown as AssignmentRow[]) ?? []);
-    setTimeSlots((slotsRes.data as TimeSlotRow[]) ?? []);
-    setAllBookings((bookingsRes.data as BookingRow[]) ?? []);
-    setAllTransactions((txRes.data as TransactionRow[]) ?? []);
-    setChatConversations((convRes.data as ChatConversationRow[]) ?? []);
+    setTemplates(templatesData);
+    setAssignments(assignData);
+    setTimeSlots(slotsData);
+    setAllBookings(bookingsData);
+    setAllTransactions(txData);
+    setChatConversations(convData);
     setLoading(false);
   }, []);
 
