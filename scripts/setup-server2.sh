@@ -18,8 +18,11 @@ set -euo pipefail
 # ── CONFIG ─────────────────────────────────────────────────────────────────
 REPO_URL="${REPO_URL:?REPO_URL nicht gesetzt — z.B. https://github.com/dein-user/dein-portal.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
-PROJECT_DIR="${PROJECT_DIR:-/var/www/portal}"
-PORTAL_DOMAIN="${PORTAL_DOMAIN:-portal.deine-domain.de}"
+PROJECT_DIR="${PROJECT_DIR:-/opt/apps/portal}"
+# Alle Domains, die auf dieses Portal zeigen (space-separated)
+PORTAL_DOMAINS="${PORTAL_DOMAINS:-mb-portal.de mb-portal.com portal.mb-portal.com portal.digital-dgigmbh.de portal.kadermarketing-agentur.de}"
+# Pfad zum vorhandenen Let's-Encrypt-Cert (wird wiederverwendet)
+SSL_CERT_DIR="${SSL_CERT_DIR:-/etc/letsencrypt/live/mb-portal.de}"
 
 # self-hosted Supabase (Server 3) — für die .env
 SUPABASE_URL="${SUPABASE_URL:?SUPABASE_URL nicht gesetzt — z.B. https://supabase.deine-domain.de}"
@@ -54,7 +57,8 @@ ok "Bun installiert"
 log "3/6  Repo klonen nach $PROJECT_DIR"
 mkdir -p "$(dirname "$PROJECT_DIR")"
 if [ -d "$PROJECT_DIR/.git" ]; then
-  echo "  Existiert bereits — pull statt clone"
+  echo "  Existiert bereits — Backup + pull statt clone"
+  cp -a "$PROJECT_DIR" "${PROJECT_DIR}.backup-$(date +%Y%m%d-%H%M%S)"
   cd "$PROJECT_DIR"
   git fetch origin
   git checkout "$REPO_BRANCH"
@@ -109,15 +113,68 @@ systemctl status portal.service --no-pager | head -n 15
 ok "Portal läuft als systemd-Service auf Port 3000"
 
 # ── 6) nginx Reverse-Proxy ─────────────────────────────────────────────────
-log "6/6  nginx Reverse-Proxy konfigurieren"
+log "6/6  nginx Reverse-Proxy konfigurieren (alte Config wird gesichert)"
+
+# Alte SPA-Config sichern (nicht löschen — Rollback möglich)
+if [ -f /etc/nginx/conf.d/mb-portal.de.conf ]; then
+  mv /etc/nginx/conf.d/mb-portal.de.conf \
+     /etc/nginx/conf.d/mb-portal.de.conf.bak-$(date +%Y%m%d-%H%M%S)
+fi
+
 cat > /etc/nginx/conf.d/portal.conf <<EOF
+# --- HTTP → HTTPS Redirect (alle Domains) ---
 server {
   listen 80;
-  server_name $PORTAL_DOMAIN;
+  listen [::]:80;
+  server_name $PORTAL_DOMAINS www.mb-portal.de www.mb-portal.com;
+
+  location /.well-known/acme-challenge/ {
+    root /var/www/html;
+  }
+
+  location / {
+    return 301 https://\$host\$request_uri;
+  }
+}
+
+# --- www → apex Redirects ---
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name www.mb-portal.de;
+  ssl_certificate $SSL_CERT_DIR/fullchain.pem;
+  ssl_certificate_key $SSL_CERT_DIR/privkey.pem;
+  return 301 https://mb-portal.de\$request_uri;
+}
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name www.mb-portal.com;
+  ssl_certificate $SSL_CERT_DIR/fullchain.pem;
+  ssl_certificate_key $SSL_CERT_DIR/privkey.pem;
+  return 301 https://mb-portal.com\$request_uri;
+}
+
+# --- Hauptblock: Reverse-Proxy zu Bun (Port 3000) ---
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name $PORTAL_DOMAINS;
+
+  ssl_certificate $SSL_CERT_DIR/fullchain.pem;
+  ssl_certificate_key $SSL_CERT_DIR/privkey.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_ciphers HIGH:!aNULL:!MD5;
+  ssl_prefer_server_ciphers on;
+
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
   client_max_body_size 50M;
 
-  # Cloudflare: echte Client-IP aus CF-Connecting-IP übernehmen
+  # Cloudflare: echte Client-IP aus CF-Connecting-IP
   set_real_ip_from 173.245.48.0/20;
   set_real_ip_from 103.21.244.0/22;
   set_real_ip_from 103.22.200.0/22;
@@ -135,6 +192,7 @@ server {
   set_real_ip_from 131.0.72.0/22;
   real_ip_header CF-Connecting-IP;
 
+  # Reverse-Proxy zu TanStack-Start (Bun) — KEIN root mehr, kein dist/
   location / {
     proxy_pass http://127.0.0.1:3000;
     proxy_http_version 1.1;
