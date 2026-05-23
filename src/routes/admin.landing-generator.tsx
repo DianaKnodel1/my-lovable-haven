@@ -32,6 +32,9 @@ type Branding = {
   landing_domain: string;
   api_endpoint: string;
   portal_url: string;
+  supabase_url: string;
+  supabase_anon_key: string;
+  tenant_id: string;
 };
 
 const EMPTY: Branding = {
@@ -50,6 +53,9 @@ const EMPTY: Branding = {
   landing_domain: "",
   api_endpoint: "",
   portal_url: "",
+  supabase_url: "",
+  supabase_anon_key: "",
+  tenant_id: "",
 };
 
 function LandingGeneratorPage() {
@@ -191,6 +197,15 @@ function LandingGeneratorPage() {
             </Field>
             <Field label="Mitarbeiter-Portal URL (Redirect nach Bewerbung)">
               <Input value={branding.portal_url} onChange={set("portal_url")} placeholder="https://portal.deine-domain.de" />
+            </Field>
+            <Field label="Supabase URL (Backend, falls direkter Insert)">
+              <Input value={branding.supabase_url} onChange={set("supabase_url")} placeholder="https://db.deine-domain.de" />
+            </Field>
+            <Field label="Supabase Anon Key">
+              <Input value={branding.supabase_anon_key} onChange={set("supabase_anon_key")} placeholder="eyJhbGciOi..." />
+            </Field>
+            <Field label="Tenant-ID (für Multi-Tenant-Filter)">
+              <Input value={branding.tenant_id} onChange={set("tenant_id")} placeholder="uuid" />
             </Field>
           </div>
           <Field label="Impressum-Text">
