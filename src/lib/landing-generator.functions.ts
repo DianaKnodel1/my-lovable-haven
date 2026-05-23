@@ -131,6 +131,21 @@ export const generateLandingZip = createServerFn({ method: "POST" })
       );
     }
 
+    // Favicon (optional)
+    if (data.faviconDataUrl) {
+      const fav = parseDataUrl(data.faviconDataUrl);
+      if (fav) {
+        const ext = fav.mime.includes("svg")
+          ? "svg"
+          : fav.mime.includes("png")
+            ? "png"
+            : fav.mime.includes("ico") || fav.mime.includes("icon")
+              ? "ico"
+              : "png";
+        zip.folder("assets")!.file(`favicon.${ext}`, fav.bytes);
+      }
+    }
+
     const buffer = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
     // Base64 für Transport über JSON
     let binary = "";
