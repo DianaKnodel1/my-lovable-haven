@@ -161,11 +161,10 @@ else
   npm run build
 fi
 
-echo "→ Service neustarten (anpassen falls nötig)"
-# Beispiele — eines davon sollte zu deinem Setup passen:
-# sudo systemctl restart portal
-# pm2 restart portal
-# docker compose restart portal
+echo "→ Portal-Service neustarten (systemd)"
+sudo systemctl restart portal.service
+sleep 2
+sudo systemctl status portal.service --no-pager | head -n 15
 EOSSH
 
 ok "Frontend deployed."
@@ -178,8 +177,6 @@ cat <<EOF
 
 Nächste Schritte (manuell):
   • DNS: A-Record deiner Portal-Domain auf Server 2 zeigen lassen
-  • Auth-Provider (Google OAuth) im self-hosted Supabase nachkonfigurieren
-    (Client-ID + Secret + Redirect-URL = https://supabase.deine-domain.de/auth/v1/callback)
   • Edge-Function-Secrets falls nötig manuell in den self-hosted Supabase übertragen
   • In .env des Portals VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY
     auf den eigenen Supabase umstellen
