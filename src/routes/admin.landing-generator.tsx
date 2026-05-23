@@ -218,7 +218,25 @@ function LandingGeneratorPage() {
           <div className="grid sm:grid-cols-2 gap-3">
             <Field label="Firmenname *"><Input value={branding.firmenname} onChange={set("firmenname")} placeholder="Mustermann GmbH" /></Field>
             <Field label="Logo (PNG/JPG/SVG, max 2 MB)">
-              <Input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={onLogo} />
+              <div className="space-y-2">
+                <Input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={onLogo} />
+                {logoDataUrl && (
+                  <div className="rounded border bg-muted/30 p-2 flex items-center justify-center h-16">
+                    <img src={logoDataUrl} alt="Logo Preview" className="max-h-12 object-contain" />
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground">Empfohlen: ≥200×60 px, transparenter Hintergrund.</p>
+              </div>
+            </Field>
+            <Field label="Favicon (ICO/PNG/SVG, max 200 KB)">
+              <div className="space-y-2">
+                <Input type="file" accept="image/x-icon,image/vnd.microsoft.icon,image/png,image/svg+xml" onChange={onFavicon} />
+                {faviconDataUrl && (
+                  <div className="rounded border bg-muted/30 p-2 flex items-center justify-center h-12">
+                    <img src={faviconDataUrl} alt="Favicon Preview" className="max-h-8 object-contain" />
+                  </div>
+                )}
+              </div>
             </Field>
             <Field label="Primärfarbe">
               <div className="flex gap-2">
@@ -239,7 +257,11 @@ function LandingGeneratorPage() {
             <Field label="PLZ"><Input value={branding.plz} onChange={set("plz")} maxLength={20} /></Field>
             <Field label="Stadt"><Input value={branding.stadt} onChange={set("stadt")} /></Field>
             <Field label="HRB-Nummer"><Input value={branding.hrb} onChange={set("hrb")} /></Field>
+            <Field label="Registergericht"><Input value={branding.registergericht} onChange={set("registergericht")} placeholder="Amtsgericht Berlin" /></Field>
+            <Field label="USt-IdNr."><Input value={branding.ust_id} onChange={set("ust_id")} placeholder="DE123456789" /></Field>
+            <Field label="Steuernummer"><Input value={branding.steuernummer} onChange={set("steuernummer")} /></Field>
             <Field label="Geschäftsführer"><Input value={branding.geschaeftsfuehrer} onChange={set("geschaeftsfuehrer")} /></Field>
+            <Field label="Telefon 2 (optional)"><Input value={branding.telefon_2} onChange={set("telefon_2")} /></Field>
             <Field label="Landing-Domain (für SEO/Canonical)"><Input value={branding.landing_domain} onChange={set("landing_domain")} placeholder="kunde-x.de" /></Field>
             <Field label="API-Endpoint für Bewerbungen *">
               <Input value={branding.api_endpoint} onChange={set("api_endpoint")} placeholder={apiPlaceholder} />
@@ -270,10 +292,26 @@ function LandingGeneratorPage() {
           <CardDescription>Lade die ZIP herunter und entpacke sie auf deinem VPS.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Button onClick={handleGenerate} disabled={loading} className="w-full sm:w-auto gap-2">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            {loading ? "Generiere…" : "Landing-Page als ZIP herunterladen"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setShowPreview((s) => !s)} className="gap-2">
+              <Eye className="h-4 w-4" />
+              {showPreview ? "Vorschau ausblenden" : "Live-Vorschau anzeigen"}
+            </Button>
+            <Button onClick={handleGenerate} disabled={loading} className="gap-2">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {loading ? "Generiere…" : "Landing-Page als ZIP herunterladen"}
+            </Button>
+          </div>
+          {showPreview && (
+            <div className="rounded border overflow-hidden bg-background">
+              <iframe
+                title="Landing Preview"
+                srcDoc={previewSrcDoc}
+                sandbox="allow-same-origin"
+                className="w-full h-[700px] border-0"
+              />
+            </div>
+          )}
           {lastFile && (
             <p className="text-xs text-muted-foreground flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
