@@ -13,10 +13,14 @@ const BrandingSchema = z.object({
   whatsapp_number: z.string().max(40).default(""),
   email: z.string().email().max(255),
   telefon: z.string().max(40).default(""),
+  telefon_2: z.string().max(40).default(""),
   strasse: z.string().max(200).default(""),
   plz: z.string().max(20).default(""),
   stadt: z.string().max(120).default(""),
   hrb: z.string().max(60).default(""),
+  registergericht: z.string().max(120).default(""),
+  ust_id: z.string().max(40).default(""),
+  steuernummer: z.string().max(40).default(""),
   geschaeftsfuehrer: z.string().max(120).default(""),
   impressum: z.string().max(5000).default(""),
   landing_domain: z.string().max(255).default(""),
@@ -32,6 +36,7 @@ const InputSchema = z.object({
   branding: BrandingSchema,
   // Logo als data-URL: "data:image/png;base64,...."
   logoDataUrl: z.string().max(5_000_000).optional().nullable(),
+  faviconDataUrl: z.string().max(1_000_000).optional().nullable(),
 });
 
 function applyPlaceholders(
@@ -124,6 +129,21 @@ export const generateLandingZip = createServerFn({ method: "POST" })
           0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
         ]),
       );
+    }
+
+    // Favicon (optional)
+    if (data.faviconDataUrl) {
+      const fav = parseDataUrl(data.faviconDataUrl);
+      if (fav) {
+        const ext = fav.mime.includes("svg")
+          ? "svg"
+          : fav.mime.includes("png")
+            ? "png"
+            : fav.mime.includes("ico") || fav.mime.includes("icon")
+              ? "ico"
+              : "png";
+        zip.folder("assets")!.file(`favicon.${ext}`, fav.bytes);
+      }
     }
 
     const buffer = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });

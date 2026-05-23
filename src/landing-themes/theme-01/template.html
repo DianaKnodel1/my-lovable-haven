@@ -6,6 +6,7 @@
 <title>{{firmenname}} – Jetzt bewerben</title>
 <meta name="description" content="Werde Teil des Teams bei {{firmenname}}. Jetzt bewerben." />
 <link rel="canonical" href="https://{{landing_domain}}" />
+<link rel="icon" href="assets/favicon.ico" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -54,9 +55,11 @@
   <div class="container">
     <p><strong>{{firmenname}}</strong></p>
     <p>{{strasse}}, {{plz}} {{stadt}}</p>
-    <p>Tel: {{telefon}} · E-Mail: <a href="mailto:{{email}}">{{email}}</a></p>
-    <p>Geschäftsführer: {{geschaeftsfuehrer}} · HRB: {{hrb}}</p>
+    <p>Tel: {{telefon}} · {{telefon_2}} · E-Mail: <a href="mailto:{{email}}">{{email}}</a></p>
+    <p>Geschäftsführer: {{geschaeftsfuehrer}} · {{registergericht}} HRB {{hrb}}</p>
+    <p>USt-IdNr.: {{ust_id}} · Steuernummer: {{steuernummer}}</p>
     <details><summary>Impressum</summary><pre>{{impressum}}</pre></details>
+    <p style="margin-top:1rem"><a href="datenschutz.html">Datenschutz</a></p>
   </div>
 </footer>
 
