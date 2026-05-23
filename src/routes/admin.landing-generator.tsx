@@ -2,14 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { generateLandingZip } from "@/lib/landing-generator.functions";
-import { THEME_LIST } from "@/lib/landing-themes";
+import { THEME_LIST, THEMES } from "@/lib/landing-themes";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Globe, Loader2, CheckCircle2 } from "lucide-react";
+import { Download, Globe, Loader2, CheckCircle2, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/landing-generator")({
@@ -23,10 +23,14 @@ type Branding = {
   whatsapp_number: string;
   email: string;
   telefon: string;
+  telefon_2: string;
   strasse: string;
   plz: string;
   stadt: string;
   hrb: string;
+  registergericht: string;
+  ust_id: string;
+  steuernummer: string;
   geschaeftsfuehrer: string;
   impressum: string;
   landing_domain: string;
@@ -44,10 +48,14 @@ const EMPTY: Branding = {
   whatsapp_number: "",
   email: "",
   telefon: "",
+  telefon_2: "",
   strasse: "",
   plz: "",
   stadt: "",
   hrb: "",
+  registergericht: "",
+  ust_id: "",
+  steuernummer: "",
   geschaeftsfuehrer: "",
   impressum: "",
   landing_domain: "",
@@ -65,6 +73,8 @@ function LandingGeneratorPage() {
   const [themeId, setThemeId] = useState<string>(THEME_LIST[0]?.id ?? "");
   const [branding, setBranding] = useState<Branding>(EMPTY);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [faviconDataUrl, setFaviconDataUrl] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
   const [lastFile, setLastFile] = useState<string | null>(null);
 
@@ -83,6 +93,45 @@ function LandingGeneratorPage() {
     reader.readAsDataURL(f);
   };
 
+  const onFavicon = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) { setFaviconDataUrl(null); return; }
+    if (f.size > 200 * 1024) {
+      toast({ title: "Favicon zu groß", description: "Max. 200 KB.", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setFaviconDataUrl(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(f);
+  };
+
+  // Live-Preview: Theme-HTML/CSS clientseitig mit Platzhaltern füllen und
+  // als single-doc <iframe srcdoc> rendern (Logo als data-URL inline).
+  const previewSrcDoc = (() => {
+    const theme = THEMES.find((t) => t.id === themeId);
+    if (!theme) return "";
+    const replace = (src: string) => {
+      let out = src;
+      for (const [k, v] of Object.entries(branding)) {
+        out = out.split(`{{${k}}}`).join(String(v ?? ""));
+      }
+      return out;
+    };
+    let html = replace(theme.html);
+    const css = replace(theme.css);
+    // <link rel="stylesheet" href="style.css"> durch inline <style> ersetzen
+    html = html.replace(
+      /<link[^>]+href=["']style\.css["'][^>]*>/i,
+      `<style>${css}</style>`,
+    );
+    // Logo durch data-URL ersetzen, sonst Platzhalter-Pixel
+    const logoSrc = logoDataUrl ?? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='40'><rect width='100%' height='100%' fill='%23e2e8f0'/><text x='50%' y='55%' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%2364748b'>Logo</text></svg>";
+    html = html.replace(/assets\/logo\.[a-z]+/gi, logoSrc);
+    // script.js entfernen (Preview ohne Submit)
+    html = html.replace(/<script[^>]*src=["']script\.js["'][^>]*><\/script>/i, "");
+    return html;
+  })();
+
   const handleGenerate = async () => {
     if (!branding.firmenname || !branding.email || !branding.api_endpoint) {
       toast({ title: "Fehlende Felder", description: "Firmenname, E-Mail und API-Endpoint sind Pflicht.", variant: "destructive" });
@@ -90,7 +139,7 @@ function LandingGeneratorPage() {
     }
     setLoading(true);
     try {
-      const res = await generate({ data: { themeId, branding, logoDataUrl } });
+      const res = await generate({ data: { themeId, branding, logoDataUrl, faviconDataUrl } });
       // Base64 → Blob → Download
       const bin = atob(res.zipBase64);
       const bytes = new Uint8Array(bin.length);
