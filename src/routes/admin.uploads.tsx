@@ -17,6 +17,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { TableSkeleton, PageHeaderSkeleton } from "@/components/SkeletonLoaders";
 import { FileText, Image as ImageIcon, Download, Search, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { fetchAll } from "@/lib/fetch-all";
 
 interface SubmissionWithFiles {
   id: string;
