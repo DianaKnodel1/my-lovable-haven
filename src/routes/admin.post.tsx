@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { fetchAll } from "@/lib/fetch-all";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
